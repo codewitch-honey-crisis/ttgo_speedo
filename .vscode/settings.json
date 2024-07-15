@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "lcd_pin_config.h": "c",
+        "cstdint": "cpp"
+    }
+}
