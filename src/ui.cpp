@@ -22,8 +22,6 @@ void main_screen_init() {
     main_screen.buffer_size(lcd_buffer_size);
     main_screen.buffer1(lcd_buffer1);
     main_screen.buffer2(lcd_buffer2);
-    uint16_t w = main_screen.dimensions().width,
-        h = main_screen.dimensions().height;
     // declare a transparent pixel/color
     rgba_pixel<32> transparent(0, 0, 0, 0);
     // screen is black
@@ -40,7 +38,6 @@ void main_screen_init() {
     speed_label.text_line_height(speed_height);
     srect16 speed_rect = text_font.measure_text(ssize16::max(),spoint16::zero(),"888",text_font.scale(speed_height),0,speed_label.text_encoding()).bounds().center_vertical(main_screen.bounds());
     speed_rect.offset_inplace(main_screen.dimensions().width-speed_rect.width(),0);
-    //printf("(%d,%d)-(%d,%d)\n",(int)speed_rect.x1,(int)speed_rect.y1,(int)speed_rect.x2,(int)speed_rect.y2);
     speed_label.text_justify(uix_justify::top_right);
     speed_label.border_color(transparent);
     speed_label.background_color(transparent);

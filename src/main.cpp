@@ -1,3 +1,5 @@
+#define MAX_SPEED 40.0f
+#define MPH
 #if __has_include(<Arduino.h>)
 #include <Arduino.h>
 #else
@@ -19,16 +21,29 @@ extern "C" void app_main();
 using namespace arduino;
 #else
 using namespace esp_idf;
+static uint32_t millis() {
+    return pdTICKS_TO_MS(xTaskGetTickCount());
+}
 #endif
 
 using namespace gfx;
 using namespace uix;
-#define MAX_SPEED 40.0f
-lcd_miser<4> dimmer;
-lwgps_t gps;
-char rx_buffer[1024];
-char speed_buffer[3];
-size_t serial_read(char* buffer, size_t size) {
+
+static lcd_miser<4> dimmer;
+static lwgps_t gps;
+#ifdef MPH
+static constexpr const char* speed_units = "mph";
+static constexpr const char* trip_units = "miles";
+static constexpr const lwgps_speed_t gps_units = LWGPS_SPEED_MPH;
+#else
+static constexpr const char* speed_units = "kph";
+static constexpr const char* trip_units = "km";
+static constexpr const lwgps_speed_t gps_units = LWGPS_SPEED_KPH;
+#endif
+static uint64_t trip_counter = 0;
+static char rx_buffer[1024];
+static char speed_buffer[3];
+static size_t serial_read(char* buffer, size_t size) {
 #ifdef ARDUINO
     if(Serial1.available()) {
         return Serial1.read(buffer,size);
@@ -45,13 +60,26 @@ size_t serial_read(char* buffer, size_t size) {
     return 0;
 #endif
 }
-void update_all() {
+static void update_all() {
     size_t read = serial_read(rx_buffer,sizeof(rx_buffer));
+    static uint8_t sats_old = 0;
+    static int speed_old = 0;
+    if(gps.sats_in_use!=sats_old) {
+        printf("Satellites: %d\n",(int)gps.sats_in_use);
+        sats_old = gps.sats_in_use;
+    }
+    static uint32_t counter_ts = millis();
+    if(millis()>=counter_ts+1000) {
+        counter_ts = millis();
+        trip_counter+=speed_old;
+        printf("Speed: %d %s\n",(int)speed_old,speed_units);
+        printf("Trip: % .2f %s\n",(double)trip_counter/(60.0*60.0),trip_units);
+    }
     if(read>0) {
         lwgps_process(&gps,rx_buffer,read);
     }
     if(gps.is_valid) {
-        float f = lwgps_to_speed(gps.speed,LWGPS_SPEED_MPH);
+        float f = lwgps_to_speed(gps.speed,gps_units);
         if(f>MAX_SPEED) f=MAX_SPEED;
         int r = (int)roundf(f);
         if((int)floorf(f)>0) {
@@ -62,11 +90,12 @@ void update_all() {
         int angle = (270 + ((int)roundf((f/MAX_SPEED)*180.0f)));
         if(angle>=360) angle-=360;
         speed_needle.angle(angle);
+        speed_old = r;
     }
     display_update();
     dimmer.update();
 }
-void initialize_common() {
+static void initialize_common() {
     display_init();
     dimmer.initialize();
     lwgps_init(&gps);
@@ -90,7 +119,7 @@ void loop() {
     update_all();    
 }
 #else
-void loop_task(void* state) {
+static void loop_task(void* state) {
     while(true) {
         update_all();
         vTaskDelay(5);
