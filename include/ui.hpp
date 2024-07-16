@@ -12,7 +12,11 @@ using color32_t = gfx::color<gfx::rgba_pixel<32>>;
 using surface_t = screen_t::control_surface_type;
 using label_t = uix::label<surface_t>;
 // the screen that holds the controls
-extern screen_t main_screen;
+extern screen_t speed_screen;
 extern needle_t speed_needle;
 extern label_t speed_label;
-extern void main_screen_init();
+
+extern screen_t trip_screen;
+extern label_t trip_label;
+
+extern void ui_init();

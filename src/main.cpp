@@ -13,6 +13,7 @@
 #include <driver/uart.h>
 extern "C" void app_main();
 #endif
+#include <button.hpp>
 #include <lcd_miser.hpp>
 #include <uix.hpp>
 #include "ui.hpp"
@@ -28,7 +29,12 @@ static uint32_t millis() {
 
 using namespace gfx;
 using namespace uix;
-
+using button_a_t = basic_button;
+using button_b_t = basic_button;
+button_a_t button_a_raw(0,10,true);
+button_b_t button_b_raw(35,10,true);
+button& button_a = button_a_raw;
+button& button_b = button_b_raw;
 static lcd_miser<4> dimmer;
 static lwgps_t gps;
 #ifdef MPH
@@ -41,8 +47,10 @@ static constexpr const char* trip_units = "km";
 static constexpr const lwgps_speed_t gps_units = LWGPS_SPEED_KPH;
 #endif
 static uint64_t trip_counter = 0;
+static char trip_buffer[64];
 static char rx_buffer[1024];
 static char speed_buffer[3];
+static int current_screen = 0;
 static size_t serial_read(char* buffer, size_t size) {
 #ifdef ARDUINO
     if(Serial1.available()) {
@@ -60,6 +68,33 @@ static size_t serial_read(char* buffer, size_t size) {
     return 0;
 #endif
 }
+void button_a_on_pressed_changed(bool pressed, void* state) {
+    if(!pressed) {
+        if(++current_screen==2) {
+            current_screen=0;
+        }
+        switch(current_screen) {
+            case 0:
+                puts("Speed screen");
+                display_screen(speed_screen);
+                break;
+            case 1:
+                puts("Trip screen");
+                display_screen(trip_screen);
+                break;
+        }
+    }
+}
+void button_b_on_pressed_changed(bool pressed, void* state) {
+    if(!pressed) {
+        puts("Reset trip counter");
+        if(current_screen==1) {
+            trip_counter = 0;
+            snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",0.0f);
+            trip_label.text(trip_buffer);
+        }
+    }
+}
 static void update_all() {
     size_t read = serial_read(rx_buffer,sizeof(rx_buffer));
     static uint8_t sats_old = 0;
@@ -73,7 +108,10 @@ static void update_all() {
         counter_ts = millis();
         trip_counter+=speed_old;
         printf("Speed: %d %s\n",(int)speed_old,speed_units);
-        printf("Trip: % .2f %s\n",(double)trip_counter/(60.0*60.0),trip_units);
+        double trip = (double)trip_counter/(60.0*60.0);
+        printf("Trip: % .2f %s\n",trip,trip_units);
+        snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",trip);
+        trip_label.text(trip_buffer);
     }
     if(read>0) {
         lwgps_process(&gps,rx_buffer,read);
@@ -93,10 +131,19 @@ static void update_all() {
         speed_old = r;
     }
     display_update();
+    if(current_screen!=0) {
+        dimmer.wake();
+    }
+    button_a.update();
+    button_b.update();
     dimmer.update();
 }
 static void initialize_common() {
     display_init();
+    button_a.initialize();
+    button_b.initialize();
+    button_a.on_pressed_changed(button_a_on_pressed_changed);
+    button_b.on_pressed_changed(button_b_on_pressed_changed);
     dimmer.initialize();
     lwgps_init(&gps);
     strcpy(speed_buffer,"--");
@@ -104,9 +151,9 @@ static void initialize_common() {
     puts("Booted");
     
     // initialize the main screen (ui.cpp)
-    main_screen_init();
+    ui_init();
 
-    display_screen(main_screen);
+    display_screen(speed_screen);
 }
 #ifdef ARDUINO
 void setup() {
@@ -139,6 +186,8 @@ void app_main() {
     const int uart_buffer_size = (1024 * 2);
     QueueHandle_t uart_queue;
     ESP_ERROR_CHECK(uart_driver_install(UART_NUM_1, uart_buffer_size, uart_buffer_size, 10, &uart_queue, 0));
+    gpio_reset_pin(GPIO_NUM_0);
+    gpio_reset_pin(GPIO_NUM_35);
     initialize_common();
     TaskHandle_t htask = nullptr;
     xTaskCreate(loop_task,"loop_task",4096,nullptr,uxTaskPriorityGet(nullptr),&htask);

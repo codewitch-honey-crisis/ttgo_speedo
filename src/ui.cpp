@@ -12,38 +12,55 @@ const gfx::open_font& text_font = OpenSans_Regular;
 using namespace uix;
 using namespace gfx;
 
-screen_t main_screen;
-needle_t speed_needle(main_screen);
-label_t speed_label(main_screen);
+screen_t speed_screen;
+needle_t speed_needle(speed_screen);
+label_t speed_label(speed_screen);
+
+screen_t trip_screen;
+label_t trip_label(trip_screen);
 
 // initialize the main screen
-void main_screen_init() {
-    main_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
-    main_screen.buffer_size(lcd_buffer_size);
-    main_screen.buffer1(lcd_buffer1);
-    main_screen.buffer2(lcd_buffer2);
+void ui_init() {
+    speed_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
+    speed_screen.buffer_size(lcd_buffer_size);
+    speed_screen.buffer1(lcd_buffer1);
+    speed_screen.buffer2(lcd_buffer2);
     // declare a transparent pixel/color
     rgba_pixel<32> transparent(0, 0, 0, 0);
     // screen is black
-    main_screen.background_color(color_t::black);
-    speed_needle.bounds(srect16(0,0,127,127).center_vertical(main_screen.bounds()));
+    speed_screen.background_color(color_t::black);
+    speed_needle.bounds(srect16(0,0,127,127).center_vertical(speed_screen.bounds()));
     speed_needle.needle_border_color(color32_t::red);
     rgba_pixel<32> nc = color32_t::red;
     nc.opacity(.5);
     speed_needle.needle_color(nc);
     speed_needle.angle(270);
-    main_screen.register_control(speed_needle);
+    speed_screen.register_control(speed_needle);
     speed_label.text_open_font(&text_font);
-    const size_t speed_height = (int)floorf(main_screen.dimensions().height/1.5f);
-    speed_label.text_line_height(speed_height);
-    srect16 speed_rect = text_font.measure_text(ssize16::max(),spoint16::zero(),"888",text_font.scale(speed_height),0,speed_label.text_encoding()).bounds().center_vertical(main_screen.bounds());
-    speed_rect.offset_inplace(main_screen.dimensions().width-speed_rect.width(),0);
+    const size_t text_height = (int)floorf(speed_screen.dimensions().height/1.5f);
+    speed_label.text_line_height(text_height);
+    srect16 speed_rect = text_font.measure_text(ssize16::max(),spoint16::zero(),"888",text_font.scale(text_height),0,speed_label.text_encoding()).bounds().center_vertical(speed_screen.bounds());
+    speed_rect.offset_inplace(speed_screen.dimensions().width-speed_rect.width(),0);
     speed_label.text_justify(uix_justify::top_right);
     speed_label.border_color(transparent);
     speed_label.background_color(transparent);
     speed_label.text_color(color32_t::white);
     speed_label.bounds(speed_rect);
     speed_label.text("--");
-    main_screen.register_control(speed_label);
-    
+    speed_screen.register_control(speed_label);
+
+    trip_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
+    trip_screen.buffer_size(lcd_buffer_size);
+    trip_screen.buffer1(lcd_buffer1);
+    trip_screen.buffer2(lcd_buffer2);
+    trip_label.text_open_font(&text_font);
+    trip_label.text_justify(uix_justify::top_right);
+    trip_label.text_line_height(text_height);
+    trip_label.padding({10,0});
+    trip_label.background_color(transparent);
+    trip_label.border_color(transparent);
+    trip_label.text_color(color32_t::orange);
+    trip_label.bounds(srect16(0,0,trip_screen.bounds().x2,text_height+1));
+    trip_label.text("0.00");
+    trip_screen.register_control(trip_label);
 }
