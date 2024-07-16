@@ -50,6 +50,7 @@ static uint64_t trip_counter = 0;
 static char trip_buffer[64];
 static char rx_buffer[1024];
 static char speed_buffer[3];
+static char stat_sat_buffer[64];
 static int current_screen = 0;
 static size_t serial_read(char* buffer, size_t size) {
 #ifdef ARDUINO
@@ -70,7 +71,7 @@ static size_t serial_read(char* buffer, size_t size) {
 }
 void button_a_on_pressed_changed(bool pressed, void* state) {
     if(!pressed) {
-        if(++current_screen==2) {
+        if(++current_screen==3) {
             current_screen=0;
         }
         switch(current_screen) {
@@ -81,6 +82,10 @@ void button_a_on_pressed_changed(bool pressed, void* state) {
             case 1:
                 puts("Trip screen");
                 display_screen(trip_screen);
+                break;
+            case 2:
+                puts("Stat screen");
+                display_screen(stat_screen);
                 break;
         }
     }
@@ -100,7 +105,7 @@ static void update_all() {
     static uint8_t sats_old = 0;
     static int speed_old = 0;
     if(gps.sats_in_use!=sats_old) {
-        printf("Satellites: %d\n",(int)gps.sats_in_use);
+        printf("Satellites: %d/%d\n",(int)gps.sats_in_use,(int)gps.sats_in_view);
         sats_old = gps.sats_in_use;
     }
     static uint32_t counter_ts = millis();
@@ -112,6 +117,8 @@ static void update_all() {
         printf("Trip: % .2f %s\n",trip,trip_units);
         snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",trip);
         trip_label.text(trip_buffer);
+        snprintf(stat_sat_buffer,sizeof(stat_sat_buffer),"%d/%d sats",(int)gps.sats_in_use,(int)gps.sats_in_view);
+        stat_sat_label.text(stat_sat_buffer);
     }
     if(read>0) {
         lwgps_process(&gps,rx_buffer,read);

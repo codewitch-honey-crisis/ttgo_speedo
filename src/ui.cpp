@@ -19,6 +19,9 @@ label_t speed_label(speed_screen);
 screen_t trip_screen;
 label_t trip_label(trip_screen);
 
+screen_t stat_screen;
+label_t stat_sat_label(stat_screen);
+
 // initialize the main screen
 void ui_init() {
     speed_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
@@ -63,4 +66,19 @@ void ui_init() {
     trip_label.bounds(srect16(0,0,trip_screen.bounds().x2,text_height+1));
     trip_label.text("0.00");
     trip_screen.register_control(trip_label);
+
+    stat_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
+    stat_screen.buffer_size(lcd_buffer_size);
+    stat_screen.buffer1(lcd_buffer1);
+    stat_screen.buffer2(lcd_buffer2);
+    stat_sat_label.text_open_font(&text_font);
+    stat_sat_label.text_justify(uix_justify::top_middle);
+    stat_sat_label.text_line_height(text_height/2);
+    stat_sat_label.padding({10,0});
+    stat_sat_label.background_color(transparent);
+    stat_sat_label.border_color(transparent);
+    stat_sat_label.text_color(color32_t::light_blue);
+    stat_sat_label.bounds(srect16(0,0,stat_screen.bounds().x2,text_height+1));
+    stat_sat_label.text("-/- sats");
+    stat_screen.register_control(stat_sat_label);
 }

@@ -19,4 +19,8 @@ extern label_t speed_label;
 extern screen_t trip_screen;
 extern label_t trip_label;
 
+extern screen_t stat_screen;
+extern label_t stat_sat_label;
+
+
 extern void ui_init();
