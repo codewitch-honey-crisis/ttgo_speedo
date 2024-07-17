@@ -50,6 +50,9 @@ static uint64_t trip_counter = 0;
 static char trip_buffer[64];
 static char rx_buffer[1024];
 static char speed_buffer[3];
+static char loc_lat_buffer[64];
+static char loc_lon_buffer[64];
+static char loc_alt_buffer[64];
 static char stat_sat_buffer[64];
 static int current_screen = 0;
 static size_t serial_read(char* buffer, size_t size) {
@@ -71,7 +74,7 @@ static size_t serial_read(char* buffer, size_t size) {
 }
 void button_a_on_pressed_changed(bool pressed, void* state) {
     if(!pressed) {
-        if(++current_screen==3) {
+        if(++current_screen==4) {
             current_screen=0;
         }
         switch(current_screen) {
@@ -84,6 +87,10 @@ void button_a_on_pressed_changed(bool pressed, void* state) {
                 display_screen(trip_screen);
                 break;
             case 2:
+                puts("Location screen");
+                display_screen(loc_screen);
+                break;
+            case 3:
                 puts("Stat screen");
                 display_screen(stat_screen);
                 break;
@@ -133,9 +140,15 @@ static void update_all() {
         itoa(r,speed_buffer,10);
         speed_label.text(speed_buffer);
         int angle = (270 + ((int)roundf((f/MAX_SPEED)*180.0f)));
-        if(angle>=360) angle-=360;
+        while(angle>=360) angle-=360;
         speed_needle.angle(angle);
         speed_old = r;
+        snprintf(loc_lat_buffer,sizeof(loc_lat_buffer),"lat: % .2f",gps.latitude);
+        loc_lat_label.text(loc_lat_buffer);
+        snprintf(loc_lon_buffer,sizeof(loc_lon_buffer),"lon: % .2f",gps.longitude);
+        loc_lon_label.text(loc_lon_buffer);
+        snprintf(loc_alt_buffer,sizeof(loc_lon_buffer),"alt: % .2f",gps.altitude);
+        loc_alt_label.text(loc_alt_buffer);
     }
     display_update();
     if(current_screen!=0) {

@@ -19,6 +19,11 @@ label_t speed_label(speed_screen);
 screen_t trip_screen;
 label_t trip_label(trip_screen);
 
+screen_t loc_screen;
+label_t loc_lat_label(loc_screen);
+label_t loc_lon_label(loc_screen);
+label_t loc_alt_label(loc_screen);
+
 screen_t stat_screen;
 label_t stat_sat_label(stat_screen);
 
@@ -66,6 +71,39 @@ void ui_init() {
     trip_label.bounds(srect16(0,0,trip_screen.bounds().x2,text_height+1));
     trip_label.text("0.00");
     trip_screen.register_control(trip_label);
+
+    const size_t loc_height = trip_screen.dimensions().height/4;
+    loc_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
+    loc_screen.buffer_size(lcd_buffer_size);
+    loc_screen.buffer1(lcd_buffer1);
+    loc_screen.buffer2(lcd_buffer2);
+    loc_lat_label.bounds(srect16(spoint16(10,loc_height/2),ssize16(trip_screen.dimensions().width-20,loc_height)));
+    loc_lat_label.text_open_font(&text_font);
+    loc_lat_label.text_line_height(loc_height);
+    loc_lat_label.padding({0,0});
+    loc_lat_label.border_color(transparent);
+    loc_lat_label.background_color(transparent);
+    loc_lat_label.text_color(color32_t::aqua);
+    loc_lat_label.text("lat: --");
+    loc_screen.register_control(loc_lat_label);
+    loc_lon_label.bounds(loc_lat_label.bounds().offset(0,loc_height));
+    loc_lon_label.text_open_font(&text_font);
+    loc_lon_label.text_line_height(loc_height);
+    loc_lon_label.padding({0,0});
+    loc_lon_label.border_color(transparent);
+    loc_lon_label.background_color(transparent);
+    loc_lon_label.text_color(color32_t::aqua);
+    loc_lon_label.text("lon: --");
+    loc_screen.register_control(loc_lon_label);
+    loc_alt_label.bounds(loc_lon_label.bounds().offset(0,loc_height));
+    loc_alt_label.text_open_font(&text_font);
+    loc_alt_label.text_line_height(loc_height);
+    loc_alt_label.padding({0,0});
+    loc_alt_label.border_color(transparent);
+    loc_alt_label.background_color(transparent);
+    loc_alt_label.text_color(color32_t::aqua);
+    loc_alt_label.text("alt: --");
+    loc_screen.register_control(loc_alt_label);
 
     stat_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
     stat_screen.buffer_size(lcd_buffer_size);
