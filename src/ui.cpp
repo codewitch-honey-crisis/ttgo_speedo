@@ -15,9 +15,11 @@ using namespace gfx;
 screen_t speed_screen;
 needle_t speed_needle(speed_screen);
 label_t speed_label(speed_screen);
+label_t speed_units_label(speed_screen);
 
 screen_t trip_screen;
 label_t trip_label(trip_screen);
+label_t trip_units_label(trip_screen);
 
 screen_t loc_screen;
 label_t loc_lat_label(loc_screen);
@@ -56,7 +58,17 @@ void ui_init() {
     speed_label.bounds(speed_rect);
     speed_label.text("--");
     speed_screen.register_control(speed_label);
-
+    const size_t unit_height = text_height/4;
+    speed_units_label.bounds(srect16(speed_label.bounds().x1,speed_label.bounds().y1+text_height,speed_label.bounds().x2,speed_label.bounds().y1+text_height+unit_height));
+    speed_units_label.text_open_font(&text_font);
+    speed_units_label.text_line_height(unit_height);
+    speed_units_label.text_justify(uix_justify::top_right);
+    speed_units_label.border_color(transparent);
+    speed_units_label.background_color(transparent);
+    speed_units_label.text_color(color32_t::white);
+    speed_units_label.text("---");
+    speed_screen.register_control(speed_units_label);
+    
     trip_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
     trip_screen.buffer_size(lcd_buffer_size);
     trip_screen.buffer1(lcd_buffer1);
@@ -69,7 +81,17 @@ void ui_init() {
     trip_label.border_color(transparent);
     trip_label.text_color(color32_t::orange);
     trip_label.bounds(srect16(0,0,trip_screen.bounds().x2,text_height+1));
-    trip_label.text("0.00");
+    trip_label.text("----");
+    trip_units_label.bounds(srect16(trip_label.bounds().x1,trip_label.bounds().y1+text_height+1,trip_label.bounds().x2,trip_label.bounds().y1+text_height+unit_height+1));
+    trip_units_label.text_open_font(&text_font);
+    trip_units_label.text_line_height(unit_height);
+    trip_units_label.text_justify(uix_justify::top_right);
+    trip_units_label.border_color(transparent);
+    trip_units_label.background_color(transparent);
+    trip_units_label.text_color(color32_t::white);
+    trip_units_label.text("-------");
+    trip_screen.register_control(trip_units_label);
+    
     trip_screen.register_control(trip_label);
 
     const size_t loc_height = trip_screen.dimensions().height/4;

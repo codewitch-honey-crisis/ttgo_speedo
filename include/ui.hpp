@@ -15,9 +15,11 @@ using label_t = uix::label<surface_t>;
 extern screen_t speed_screen;
 extern needle_t speed_needle;
 extern label_t speed_label;
+extern label_t speed_units_label;
 
 extern screen_t trip_screen;
 extern label_t trip_label;
+extern label_t trip_units_label;
 
 extern screen_t loc_screen;
 extern label_t loc_lat_label;
