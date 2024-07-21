@@ -17,6 +17,10 @@ extern needle_t speed_needle;
 extern label_t speed_label;
 extern label_t speed_units_label;
 
+extern screen_t trip_screen;
+extern label_t trip_label;
+extern label_t trip_units_label;
+
 extern screen_t loc_screen;
 extern label_t loc_lat_label;
 extern label_t loc_lon_label;
@@ -24,6 +28,5 @@ extern label_t loc_alt_label;
 
 extern screen_t stat_screen;
 extern label_t stat_sat_label;
-
 
 extern void ui_init();

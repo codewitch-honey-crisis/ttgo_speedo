@@ -68,13 +68,38 @@ void ui_init() {
     speed_units_label.text_color(color32_t::white);
     speed_units_label.text("---");
     speed_screen.register_control(speed_units_label);
+    
+    trip_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
+    trip_screen.buffer_size(lcd_buffer_size);
+    trip_screen.buffer1(lcd_buffer1);
+    trip_screen.buffer2(lcd_buffer2);
+    trip_label.text_open_font(&text_font);
+    trip_label.text_justify(uix_justify::top_right);
+    trip_label.text_line_height(text_height);
+    trip_label.padding({10,0});
+    trip_label.background_color(transparent);
+    trip_label.border_color(transparent);
+    trip_label.text_color(color32_t::orange);
+    trip_label.bounds(srect16(0,0,trip_screen.bounds().x2,text_height+1));
+    trip_label.text("----");
+    trip_units_label.bounds(srect16(trip_label.bounds().x1,trip_label.bounds().y1+text_height+1,trip_label.bounds().x2,trip_label.bounds().y1+text_height+unit_height+1));
+    trip_units_label.text_open_font(&text_font);
+    trip_units_label.text_line_height(unit_height);
+    trip_units_label.text_justify(uix_justify::top_right);
+    trip_units_label.border_color(transparent);
+    trip_units_label.background_color(transparent);
+    trip_units_label.text_color(color32_t::white);
+    trip_units_label.text("-------");
+    trip_screen.register_control(trip_units_label);
+    
+    trip_screen.register_control(trip_label);
 
-    const size_t loc_height = speed_screen.dimensions().height/4;
+    const size_t loc_height = trip_screen.dimensions().height/4;
     loc_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
     loc_screen.buffer_size(lcd_buffer_size);
     loc_screen.buffer1(lcd_buffer1);
     loc_screen.buffer2(lcd_buffer2);
-    loc_lat_label.bounds(srect16(spoint16(10,loc_height/2),ssize16(speed_screen.dimensions().width-20,loc_height)));
+    loc_lat_label.bounds(srect16(spoint16(10,loc_height/2),ssize16(trip_screen.dimensions().width-20,loc_height)));
     loc_lat_label.text_open_font(&text_font);
     loc_lat_label.text_line_height(loc_height);
     loc_lat_label.padding({0,0});
