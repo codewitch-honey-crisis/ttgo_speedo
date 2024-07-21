@@ -38,10 +38,7 @@ multi_button button_b(button_b_raw);
 static lcd_miser<4> dimmer;
 static lwgps_t gps;
 static char speed_units[32];
-static char trip_units[16];
 static lwgps_speed_t gps_units;
-static uint64_t trip_counter = 0;
-static char trip_buffer[64];
 static char rx_buffer[1024];
 static char speed_buffer[3];
 static char loc_lat_buffer[64];
@@ -67,21 +64,18 @@ static size_t serial_read(char* buffer, size_t size) {
 #endif
 }
 void toggle_units() {
-    trip_counter = 0;
     if(gps_units==LWGPS_SPEED_KPH) {
         gps_units = LWGPS_SPEED_MPH;
         strcpy(speed_units,"mph");
-        strcpy(trip_units,"miles");
     } else {
         gps_units = LWGPS_SPEED_KPH;
         strcpy(speed_units,"kph");
-        strcpy(trip_units,"kilometers");
     }
 }
 void button_a_on_pressed_changed(bool pressed, void* state) {
     if(!pressed) {
         dimmer.wake();
-        if(++current_screen==4) {
+        if(++current_screen==3) {
             current_screen=0;
         }
         switch(current_screen) {
@@ -90,37 +84,24 @@ void button_a_on_pressed_changed(bool pressed, void* state) {
                 display_screen(speed_screen);
                 break;
             case 1:
-                puts("Trip screen");
-                display_screen(trip_screen);
-                break;
-            case 2:
                 puts("Location screen");
                 display_screen(loc_screen);
                 break;
-            case 3:
+            case 2:
                 puts("Stat screen");
                 display_screen(stat_screen);
                 break;
         }
     }
 }
-void button_b_on_click(int clicks, void* state) {
-    dimmer.wake();
-    clicks&=1;
-    if(clicks) {
+void button_b_on_pressed_changed(bool pressed, void* state) {
+    if(!pressed) {
+        dimmer.wake();
         toggle_units();
         speed_units_label.text(speed_units);
-        trip_units_label.text(trip_units);
     }
 }
-void button_b_on_long_click(void* state) {
-    dimmer.wake();
-    if(current_screen==1) {
-        trip_counter = 0;
-        snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",0.0f);
-        trip_label.text(trip_buffer);
-    }
-}
+
 static void update_all() {
     size_t read = serial_read(rx_buffer,sizeof(rx_buffer));
     static uint8_t sats_old = 0;
@@ -132,12 +113,7 @@ static void update_all() {
     static uint32_t counter_ts = millis();
     if(millis()>=counter_ts+1000) {
         counter_ts = millis();
-        trip_counter+=speed_old;
         printf("Speed: %d %s\n",(int)speed_old,speed_units);
-        double trip = (double)trip_counter/(60.0*60.0);
-        printf("Trip: % .2f %s\n",trip,trip_units);
-        snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",trip);
-        trip_label.text(trip_buffer);
         snprintf(stat_sat_buffer,sizeof(stat_sat_buffer),"%d/%d sats",(int)gps.sats_in_use,(int)gps.sats_in_view);
         stat_sat_label.text(stat_sat_buffer);
     }
@@ -176,12 +152,11 @@ static void initialize_common() {
     display_init();
     gps_units = LWGPS_SPEED_KPH;
     strcpy(speed_units,"kph");
-    strcpy(trip_units,"kilometers");
     button_a.initialize();
     button_b.initialize();
     button_a.on_pressed_changed(button_a_on_pressed_changed);
-    button_b.on_click(button_b_on_click);
-    button_b.on_long_click(button_b_on_long_click);
+    button_b.on_pressed_changed(button_b_on_pressed_changed);
+    
     dimmer.initialize();
     lwgps_init(&gps);
     strcpy(speed_buffer,"--");
@@ -189,7 +164,6 @@ static void initialize_common() {
     // initialize the screens (ui.cpp)
     ui_init();
     speed_units_label.text(speed_units);
-    trip_units_label.text(trip_units);
 #ifdef MILES
     toggle_units();
 #endif
