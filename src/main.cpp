@@ -252,8 +252,6 @@ void app_main() {
     const int uart_buffer_size = (1024 * 2);
     QueueHandle_t uart_queue;
     ESP_ERROR_CHECK(uart_driver_install(UART_NUM_1, uart_buffer_size, uart_buffer_size, 10, &uart_queue, 0));
-    gpio_reset_pin(GPIO_NUM_0);
-    gpio_reset_pin(GPIO_NUM_35);
     initialize_common();
     TaskHandle_t htask = nullptr;
     xTaskCreate(loop_task,"loop_task",4096,nullptr,uxTaskPriorityGet(nullptr),&htask);
