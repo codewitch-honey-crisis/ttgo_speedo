@@ -69,7 +69,7 @@ static uint8_t* const lcd_buffer2 = nullptr;
 using screen_t = uix::screen_ex<LCD_FRAME_ADAPTER,LCD_X_ALIGN,LCD_Y_ALIGN>;
 
 // the active screen pointer
-extern screen_t* active_screen;
+extern screen_t* display_active_screen;
 
 // initializes the display
 extern void display_init();

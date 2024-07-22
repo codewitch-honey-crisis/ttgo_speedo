@@ -27,7 +27,7 @@ uint8_t* lcd_buffer1=nullptr;
 #endif
 
 // the active screen
-screen_t* active_screen = nullptr;
+screen_t* display_active_screen = nullptr;
 static bool display_sleeping = false;
 #if defined(ESP_PLATFORM) && !defined(E_PAPER)
 #ifdef LCD_DMA
@@ -35,8 +35,8 @@ static bool display_sleeping = false;
 static bool lcd_flush_ready(esp_lcd_panel_io_handle_t panel_io, 
                             esp_lcd_panel_io_event_data_t* edata, 
                             void* user_ctx) {
-    if(active_screen!=nullptr) {
-        active_screen->flush_complete();
+    if(display_active_screen!=nullptr) {
+        display_active_screen->flush_complete();
     }
     return true;
 }
@@ -117,7 +117,7 @@ void uix_flush(const gfx::rect16& bounds,
 #endif
 
 void display_update() {
-    if(active_screen!=nullptr) {
+    if(display_active_screen!=nullptr) {
 #ifdef E_PAPER
         bool dirty = active_screen->dirty();
         if(dirty) {
@@ -129,25 +129,25 @@ void display_update() {
             gfx::draw::resume(epd);
         }
 #else
-        active_screen->update();
+        display_active_screen->update();
 #endif
     }
 }
 
 void display_screen(screen_t& new_screen) {
-    if(active_screen!=nullptr) {
-        if(active_screen->flushing()) {
-            active_screen->update();
+    if(display_active_screen!=nullptr) {
+        if(display_active_screen->flushing()) {
+            display_active_screen->update();
         }
     }
-    active_screen = &new_screen;
-    active_screen->on_flush_callback(uix_flush);
+    display_active_screen = &new_screen;
+    display_active_screen->on_flush_callback(uix_flush);
 #ifndef ESP_PLATFORM
 #ifdef LCD_DMA
     active_screen->wait_flush_callback(uix_wait);
 #endif
 #endif
-    active_screen->invalidate();   
+    display_active_screen->invalidate();   
 }
 void display_sleep() {
     if(!display_sleeping) {
