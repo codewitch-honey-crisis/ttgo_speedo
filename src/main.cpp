@@ -119,6 +119,8 @@ void button_a_on_pressed_changed(bool pressed, void* state) {
                 display_screen(stat_screen);
                 break;
         }
+    } else {
+        
     }
 }
 // bottom button handler, toggle units
