@@ -28,7 +28,7 @@ uint8_t* lcd_buffer1=nullptr;
 
 // the active screen
 screen_t* active_screen = nullptr;
-
+static bool display_sleeping = false;
 #if defined(ESP_PLATFORM) && !defined(E_PAPER)
 #ifdef LCD_DMA
 // only needed if DMA enabled
@@ -147,7 +147,27 @@ void display_screen(screen_t& new_screen) {
     active_screen->wait_flush_callback(uix_wait);
 #endif
 #endif
-    active_screen->invalidate();
-
-    
+    active_screen->invalidate();   
+}
+void display_sleep() {
+    if(!display_sleeping) {
+        //esp_lcd_panel_io_tx_param(lcd_io_handle,0x10,NULL,0);
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+        esp_lcd_panel_disp_on_off(lcd_handle, false);
+#else
+        esp_lcd_panel_disp_off(lcd_handle, true);
+#endif
+        display_sleeping = true;
+    }
+}
+void display_wake() {
+    if(display_sleeping) {
+        //esp_lcd_panel_io_tx_param(lcd_io_handle,0x11,NULL,0);
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+        esp_lcd_panel_disp_on_off(lcd_handle, true);
+#else
+        esp_lcd_panel_disp_off(lcd_handle, false);
+#endif
+        display_sleeping = false;
+    }
 }

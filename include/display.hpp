@@ -77,3 +77,7 @@ extern void display_init();
 extern void display_update();
 // switches the active screen
 extern void display_screen(screen_t& new_screen);
+// puts the LCD to sleep
+extern void display_sleep();
+// wakes the LCD
+extern void display_wake();

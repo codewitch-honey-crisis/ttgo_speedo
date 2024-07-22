@@ -118,7 +118,9 @@ void button_a_on_pressed_changed(bool pressed, void* state) {
 }
 // bottom button handler, toggle units
 void button_b_on_click(int clicks, void* state) {
+    display_wake();
     dimmer.wake();
+    
     clicks&=1;
     if(clicks) {
         toggle_units();
@@ -128,7 +130,9 @@ void button_b_on_click(int clicks, void* state) {
 }
 // long handler - reset trip counter
 void button_b_on_long_click(void* state) {
+    display_wake();
     dimmer.wake();
+
     if(current_screen==1) {
         trip_counter = 0;
         snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",0.0f);
@@ -168,6 +172,7 @@ static void update_all() {
         int r = (int)roundf(f);
         // if the speed isn't zero wake the screen up
         if((int)floorf(f)>0) {
+            display_wake();
             dimmer.wake();
         }
         // fill speed_buffer
@@ -188,6 +193,7 @@ static void update_all() {
     }
     // only screen zero auto-dims
     if(current_screen!=0) {
+        display_wake();
         dimmer.wake();
     }
     // update the various objects
@@ -195,6 +201,10 @@ static void update_all() {
     button_a.update();
     button_b.update();
     dimmer.update();
+
+    if(dimmer.faded()) {
+        display_sleep();
+    }
 }
 static void initialize_common() {
     display_init();

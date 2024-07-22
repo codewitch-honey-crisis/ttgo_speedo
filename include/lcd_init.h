@@ -20,7 +20,7 @@ bool lcd_panel_init(size_t max_transfer_size, esp_lcd_panel_io_color_trans_done_
 #endif  // __cplusplus
 
 
-
+esp_lcd_panel_io_handle_t lcd_io_handle;
 esp_lcd_panel_handle_t lcd_handle;
 #ifdef LCD_IMPLEMENTATION
 #include <string.h>
@@ -1173,7 +1173,6 @@ bool lcd_panel_init(size_t max_transfer_size, esp_lcd_panel_io_color_trans_done_
     ESP_ERROR_CHECK(i2c_param_config(LCD_I2C_HOST, &i2c_conf));
     ESP_ERROR_CHECK(i2c_driver_install(LCD_I2C_HOST, I2C_MODE_MASTER, 0, 0, 0));
 
-    esp_lcd_panel_io_handle_t io_handle = NULL;
     esp_lcd_panel_io_i2c_config_t io_config;
     memset(&io_config,0,sizeof(esp_lcd_panel_io_i2c_config_t));
     io_config.dev_addr = LCD_I2C_ADDR;
@@ -1189,7 +1188,7 @@ bool lcd_panel_init(size_t max_transfer_size, esp_lcd_panel_io_color_trans_done_
 #if defined(LCD_ENABLE_CONTROL_PHASE) && LCD_ENABLE_CONTROL_PHASE != 0
     io_config.flags.disable_control_phase = 1;
 #endif
-    esp_lcd_new_panel_io_i2c((esp_lcd_i2c_bus_handle_t)LCD_I2C_HOST, &io_config, &io_handle);
+    esp_lcd_new_panel_io_i2c((esp_lcd_i2c_bus_handle_t)LCD_I2C_HOST, &io_config, &lcd_io_handle);
 #elif defined(LCD_SPI_HOST)  // 1-bit SPI
     spi_bus_config_t bus_config;
     memset(&bus_config, 0, sizeof(bus_config));
@@ -1215,7 +1214,6 @@ bool lcd_panel_init(size_t max_transfer_size, esp_lcd_panel_io_color_trans_done_
     // Initialize the SPI bus on LCD_SPI_HOST
     spi_bus_initialize(LCD_SPI_HOST, &bus_config, SPI_DMA_CH_AUTO);
 
-    esp_lcd_panel_io_handle_t io_handle = NULL;
     esp_lcd_panel_io_spi_config_t io_config;
     memset(&io_config, 0, sizeof(io_config));
     io_config.dc_gpio_num = LCD_PIN_NUM_DC,
@@ -1228,7 +1226,7 @@ bool lcd_panel_init(size_t max_transfer_size, esp_lcd_panel_io_color_trans_done_
     io_config.on_color_trans_done = done_callback;
     // Attach the LCD to the SPI bus
     esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)LCD_SPI_HOST,
-                             &io_config, &io_handle);
+                             &io_config, &lcd_io_handle);
 #elif defined(LCD_PIN_NUM_D07)  // 8 or 16-bit i8080
     gpio_set_direction((gpio_num_t)LCD_PIN_NUM_RD, GPIO_MODE_OUTPUT);
     gpio_set_level((gpio_num_t)LCD_PIN_NUM_RD, 1);
@@ -1263,8 +1261,6 @@ bool lcd_panel_init(size_t max_transfer_size, esp_lcd_panel_io_color_trans_done_
 
     esp_lcd_new_i80_bus(&bus_config, &i80_bus);
 
-    esp_lcd_panel_io_handle_t io_handle = NULL;
-
     esp_lcd_panel_io_i80_config_t io_config;
     memset(&io_config, 0, sizeof(io_config));
     io_config.cs_gpio_num = LCD_PIN_NUM_CS;
@@ -1286,7 +1282,7 @@ bool lcd_panel_init(size_t max_transfer_size, esp_lcd_panel_io_color_trans_done_
 #endif  // LCD_SWAP_COLOR_BYTES
     io_config.flags.cs_active_high = false;
     io_config.flags.reverse_color_bits = false;
-    esp_lcd_new_panel_io_i80(i80_bus, &io_config, &io_handle);
+    esp_lcd_new_panel_io_i80(i80_bus, &io_config, &lcd_io_handle);
 #endif  // LCD_PIN_NUM_D15
     lcd_handle = NULL;
     esp_lcd_panel_dev_config_t panel_config;
@@ -1311,7 +1307,7 @@ if(((int)LCD_COLOR_SPACE) == 0) {
     panel_config.bits_per_pixel = LCD_BIT_DEPTH;
 #endif
     // Initialize the LCD configuration
-    LCD_PANEL(io_handle, &panel_config, &lcd_handle);
+    LCD_PANEL(lcd_io_handle, &panel_config, &lcd_handle);
 
 #ifdef LCD_PIN_NUM_BCKL
     // Turn off backlight to avoid unpredictable display on
