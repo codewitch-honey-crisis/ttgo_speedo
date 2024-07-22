@@ -92,8 +92,8 @@ void toggle_units() {
 // top button handler - switch screens
 void button_a_on_pressed_changed(bool pressed, void* state) {
     if(!pressed) {
-        bool dim = dimmer.dimmed();
         display_wake();
+        bool dim = dimmer.dimmed();
         dimmer.wake();
         if(dim) {
             return;
