@@ -92,7 +92,12 @@ void toggle_units() {
 // top button handler - switch screens
 void button_a_on_pressed_changed(bool pressed, void* state) {
     if(!pressed) {
+        bool dim = dimmer.dimmed();
+        display_wake();
         dimmer.wake();
+        if(dim) {
+            return;
+        }
         if(++current_screen==4) {
             current_screen=0;
         }
@@ -119,8 +124,11 @@ void button_a_on_pressed_changed(bool pressed, void* state) {
 // bottom button handler, toggle units
 void button_b_on_click(int clicks, void* state) {
     display_wake();
+    bool dim = dimmer.dimmed();
     dimmer.wake();
-    
+    if(dim) {
+        return;
+    }
     clicks&=1;
     if(clicks) {
         toggle_units();
