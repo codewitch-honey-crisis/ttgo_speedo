@@ -320,7 +320,6 @@ static void initialize_common() {
     lwgps_init(&gps);
     strcpy(speed_buffer,"--");
     speed_label.text(speed_buffer);
-    // initialize the screens (ui.cpp)
     gps_units = LWGPS_SPEED_KPH;
     strcpy(speed_units,"kph");
     strcpy(trip_units,"kilometers");
