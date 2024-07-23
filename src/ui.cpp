@@ -69,13 +69,13 @@ void ui_init() {
     speed_screen.register_control(speed_units_label);
     speed_big_label.bounds(srect16(0,0,speed_screen.dimensions().width-unit_width-3,speed_screen.bounds().y2));
     speed_big_label.text_open_font(&text_font);
-    speed_big_label.text_line_height(speed_screen.dimensions().height);
+    speed_big_label.text_line_height(speed_screen.dimensions().height*1.2);
     speed_big_label.border_color(transparent);
     speed_big_label.background_color(transparent);
     speed_big_label.text_color(color32_t::white);
     speed_big_label.text("--");
     speed_big_label.visible(false);
-    speed_big_label.text_justify(uix_justify::top_right);
+    speed_big_label.text_justify(uix_justify::center_right);
     speed_screen.register_control(speed_big_label);
     speed_big_units_label.bounds(srect16(speed_screen.dimensions().width-unit_width-1,0,speed_screen.bounds().x2,unit_height-1).center_vertical(speed_screen.bounds()));
     speed_big_units_label.text_open_font(&text_font);
