@@ -1,5 +1,6 @@
 #define MAX_SPEED 40.0f
 #define MILES
+#define BAUD 9600
 #if __has_include(<Arduino.h>)
 #include <Arduino.h>
 #else
@@ -218,7 +219,6 @@ static void update_all() {
         if(!speed_changed && dimmer.faded()) {
             // if the speed isn't zero or it's not the speed screen wake the screen up
             if(current_screen!=0 || (gps_units==LWGPS_SPEED_KPH && ((int)roundf(kph))>0) || (gps_units==LWGPS_SPEED_MPH && ((int)roundf(mph))>0)) {
-                puts("wake");
                 display_wake();
                 dimmer.wake();
             } else {
@@ -240,7 +240,6 @@ static void update_all() {
         }
         // update the speed
         if(speed_changed) {
-            puts("Speed change");
             if((gps_units==LWGPS_SPEED_KPH && ((int)roundf(kph))>0) || (gps_units==LWGPS_SPEED_MPH && ((int)roundf(mph))>0)) {
                 display_wake();
                 dimmer.wake();
@@ -323,7 +322,7 @@ static void initialize_common() {
 #ifdef ARDUINO
 void setup() {
     Serial.begin(115200);
-    Serial1.begin(9600,SERIAL_8N1,22,21);
+    Serial1.begin(BAUD,SERIAL_8N1,22,21);
     initialize_common();
 }
 
@@ -340,7 +339,7 @@ static void loop_task(void* state) {
 extern "C" void app_main() {
     uart_config_t ucfg;
     memset(&ucfg,0,sizeof(ucfg));
-    ucfg.baud_rate = 9600;
+    ucfg.baud_rate = BAUD;
     ucfg.data_bits = UART_DATA_8_BITS;
     ucfg.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
     ucfg.parity = UART_PARITY_DISABLE;
