@@ -162,12 +162,12 @@ static void update_all() {
     }
     // each second, sample the speed and update the trip counter
     static uint32_t counter_ts = millis();
-    if(millis()>=counter_ts+1000) {
+    if(millis()>=counter_ts+100) {
         counter_ts = millis();
         trip_counter_miles+=speed_old_mph;
         trip_counter_kilos+=speed_old_kph;
         // printf("Speed: %d %s\n",(int)speed_old_mph,speed_units);
-        double trip = (double)((gps_units==LWGPS_SPEED_KPH)? trip_counter_kilos:trip_counter_miles)/(60.0*60.0);
+        double trip = (double)((gps_units==LWGPS_SPEED_KPH)? trip_counter_kilos:trip_counter_miles)/(60.0*60.0*10.0);
         // printf("Trip: % .2f %s\n",trip,trip_units);
         snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",trip);
         trip_label.text(trip_buffer);
