@@ -1,7 +1,3 @@
-// required to implort the icon implementation
-// must appear only once in the project
-//#define DISCONNECTED_ICON_IMPLEMENTATION
-//#include <disconnected_icon.hpp>
 // our font for the UI. 
 #define OPENSANS_REGULAR_IMPLEMENTATION
 #include "fonts/OpenSans_Regular.hpp"
