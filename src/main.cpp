@@ -153,27 +153,8 @@ void button_b_on_long_click(void* state) {
 }
 // main application loop
 static void update_all() {
-    static uint8_t sats_old = 0;
-    static int speed_old_kph = 0;
-    static int speed_old_mph = 0;
-    if(gps.sats_in_use!=sats_old) {
-        // printf("Satellites: %d/%d\n",(int)gps.sats_in_use,(int)gps.sats_in_view);
-        sats_old = gps.sats_in_use;
-    }
-    // each second, sample the speed and update the trip counter
-    static uint32_t counter_ts = millis();
-    if(millis()>=counter_ts+100) {
-        counter_ts = millis();
-        trip_counter_miles+=speed_old_mph;
-        trip_counter_kilos+=speed_old_kph;
-        // printf("Speed: %d %s\n",(int)speed_old_mph,speed_units);
-        double trip = (double)((gps_units==LWGPS_SPEED_KPH)? trip_counter_kilos:trip_counter_miles)/(60.0*60.0*10.0);
-        // printf("Trip: % .2f %s\n",trip,trip_units);
-        snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",trip);
-        trip_label.text(trip_buffer);
-        snprintf(stat_sat_buffer,sizeof(stat_sat_buffer),"%d/%d sats",(int)gps.sats_in_use,(int)gps.sats_in_view);
-        stat_sat_label.text(stat_sat_buffer);
-    }
+    static uint32_t poll_ts = millis();
+    static uint64_t total_ts =0;
     // try to read from the GPS
     size_t read = serial_read(rx_buffer,sizeof(rx_buffer));
     if(read>0) {
@@ -181,13 +162,37 @@ static void update_all() {
     }
     // if we have GPS data:
     if(gps.is_valid) {
+        // compute how long since the last
+        uint32_t diff_ts = millis()-poll_ts;
+        poll_ts = millis();
+        // add it to the total
+        total_ts += diff_ts;
         float f = lwgps_to_speed(gps.speed,LWGPS_SPEED_MPH);
         int mph = (int)roundf(f);
-        if(mph>MAX_SPEED) mph=MAX_SPEED;
         f = lwgps_to_speed(gps.speed,LWGPS_SPEED_KPH);
         int kph = (int)roundf(f);
-        if(kph>MAX_SPEED) kph=MAX_SPEED;
-        
+        if(total_ts>=100) {
+            while(total_ts>=100) {
+                total_ts-=100;
+                trip_counter_miles+=mph;
+                trip_counter_kilos+=kph;
+            }
+            // printf("Speed: %d %s\n",(int)speed_old_mph,speed_units);
+            double trip = (double)((gps_units==LWGPS_SPEED_KPH)? trip_counter_kilos:trip_counter_miles)/(60.0*60.0*10.0);
+            // printf("Trip: % .2f %s\n",trip,trip_units);
+            snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",trip);
+            trip_label.text(trip_buffer);
+            snprintf(stat_sat_buffer,sizeof(stat_sat_buffer),"%d/%d sats",(int)gps.sats_in_use,(int)gps.sats_in_view);
+            stat_sat_label.text(stat_sat_buffer);
+
+            // update the position data
+            snprintf(loc_lat_buffer,sizeof(loc_lat_buffer),"lat: % .2f",gps.latitude);
+            loc_lat_label.text(loc_lat_buffer);
+            snprintf(loc_lon_buffer,sizeof(loc_lon_buffer),"lon: % .2f",gps.longitude);
+            loc_lon_label.text(loc_lon_buffer);
+            snprintf(loc_alt_buffer,sizeof(loc_lon_buffer),"alt: % .2f",gps.altitude);
+            loc_alt_label.text(loc_alt_buffer);
+        }
         // if the speed isn't zero wake the screen up
         if((gps_units==LWGPS_SPEED_KPH && kph>0) || (gps_units==LWGPS_SPEED_MPH && mph>0)) {
             display_wake();
@@ -195,24 +200,15 @@ static void update_all() {
         }
         // fill speed_buffer
         if(gps_units==LWGPS_SPEED_KPH) {
-            itoa(kph,speed_buffer,10);
+            itoa(kph>MAX_SPEED?MAX_SPEED:kph,speed_buffer,10);
         } else {
-            itoa(mph,speed_buffer,10);
+            itoa(mph>MAX_SPEED?MAX_SPEED:mph,speed_buffer,10);
         }
         speed_label.text(speed_buffer);
-        speed_old_mph = mph;
-        speed_old_kph = kph;
         // figure the needle angle
-        int angle = (270 + ((int)roundf((f/MAX_SPEED)*180.0f)));
+        int angle = (270 + ((int)roundf(((f>MAX_SPEED?MAX_SPEED:f)/MAX_SPEED)*180.0f)));
         while(angle>=360) angle-=360;
         speed_needle.angle(angle);
-        // update the position data
-        snprintf(loc_lat_buffer,sizeof(loc_lat_buffer),"lat: % .2f",gps.latitude);
-        loc_lat_label.text(loc_lat_buffer);
-        snprintf(loc_lon_buffer,sizeof(loc_lon_buffer),"lon: % .2f",gps.longitude);
-        loc_lon_label.text(loc_lon_buffer);
-        snprintf(loc_alt_buffer,sizeof(loc_lon_buffer),"alt: % .2f",gps.altitude);
-        loc_alt_label.text(loc_alt_buffer);
     }
     // only screen zero auto-dims
     if(current_screen!=0) {
