@@ -301,27 +301,29 @@ static void update_all() {
     button_a.update();
     button_b.update();
     dimmer.update();
-
+    
+    // if the backlight is off
+    // sleep the display
     if(dimmer.faded()) {
         display_sleep();
     }
 }
 static void initialize_common() {
     display_init();
-    gps_units = LWGPS_SPEED_KPH;
-    strcpy(speed_units,"kph");
-    strcpy(trip_units,"kilometers");
     button_a.initialize();
     button_b.initialize();
     button_a.on_pressed_changed(button_a_on_pressed_changed);
     button_b.on_click(button_b_on_click);
     button_b.on_long_click(button_b_on_long_click);
     dimmer.initialize();
+    ui_init();
     lwgps_init(&gps);
     strcpy(speed_buffer,"--");
     speed_label.text(speed_buffer);
     // initialize the screens (ui.cpp)
-    ui_init();
+    gps_units = LWGPS_SPEED_KPH;
+    strcpy(speed_units,"kph");
+    strcpy(trip_units,"kilometers");
     speed_units_label.text(speed_units);
     trip_units_label.text(trip_units);
 #ifdef MILES
