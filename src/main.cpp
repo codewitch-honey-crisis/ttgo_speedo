@@ -266,7 +266,7 @@ static void loop_task(void* state) {
         vTaskDelay(1);
     }
 }
-void app_main() {
+extern "C" void app_main() {
     uart_config_t ucfg;
     memset(&ucfg,0,sizeof(ucfg));
     ucfg.baud_rate = 9600;
