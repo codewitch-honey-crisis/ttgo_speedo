@@ -46,19 +46,21 @@ static lcd_miser<4> dimmer;
 static lwgps_t gps;
 
 // ui data
-static char speed_units[32];
+static char speed_units[16];
 static char trip_units[16];
 static lwgps_speed_t gps_units;
 static double trip_counter_miles = 0;
 static double trip_counter_kilos = 0;
 static char trip_buffer[64];
-static char rx_buffer[1024];
 static char speed_buffer[3];
 static char loc_lat_buffer[64];
 static char loc_lon_buffer[64];
 static char loc_alt_buffer[64];
 static char stat_sat_buffer[64];
 static int current_screen = 0;
+
+// serial incoming
+static char rx_buffer[1024];
 // reads from Serial1/UART_NUM_1
 static size_t serial_read(char* buffer, size_t size) {
 #ifdef ARDUINO

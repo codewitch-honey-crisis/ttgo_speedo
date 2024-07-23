@@ -41,8 +41,8 @@ void ui_init() {
     speed_screen.background_color(color_t::black);
     speed_needle.bounds(srect16(0,0,127,127).center_vertical(speed_screen.bounds()));
     speed_needle.needle_border_color(color32_t::red);
-    rgba_pixel<32> nc = color32_t::red;
-    nc.opacity(.5);
+    rgba_pixel<32> nc;
+    nc.channelr<channel_name::R,channel_name::G,channel_name::B>(.5f,0,0);
     speed_needle.needle_color(nc);
     speed_needle.angle(270);
     speed_screen.register_control(speed_needle);
