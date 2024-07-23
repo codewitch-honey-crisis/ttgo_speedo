@@ -49,8 +49,8 @@ static lwgps_t gps;
 static char speed_units[32];
 static char trip_units[16];
 static lwgps_speed_t gps_units;
-static uint64_t trip_counter_miles = 0;
-static uint64_t trip_counter_kilos = 0;
+static double trip_counter_miles = 0;
+static double trip_counter_kilos = 0;
 static char trip_buffer[64];
 static char rx_buffer[1024];
 static char speed_buffer[3];
@@ -167,10 +167,8 @@ static void update_all() {
         poll_ts = millis();
         // add it to the total
         total_ts += diff_ts;
-        float f = lwgps_to_speed(gps.speed,LWGPS_SPEED_MPH);
-        int mph = (int)roundf(f);
-        f = lwgps_to_speed(gps.speed,LWGPS_SPEED_KPH);
-        int kph = (int)roundf(f);
+        float mph = lwgps_to_speed(gps.speed,LWGPS_SPEED_MPH);
+        float kph = lwgps_to_speed(gps.speed,LWGPS_SPEED_KPH);
         if(total_ts>=100) {
             while(total_ts>=100) {
                 total_ts-=100;
@@ -200,12 +198,13 @@ static void update_all() {
         }
         // fill speed_buffer
         if(gps_units==LWGPS_SPEED_KPH) {
-            itoa(kph>MAX_SPEED?MAX_SPEED:kph,speed_buffer,10);
+            itoa((int)roundf(kph>MAX_SPEED?MAX_SPEED:kph),speed_buffer,10);
         } else {
-            itoa(mph>MAX_SPEED?MAX_SPEED:mph,speed_buffer,10);
+            itoa((int)roundf(mph>MAX_SPEED?MAX_SPEED:mph),speed_buffer,10);
         }
         speed_label.text(speed_buffer);
         // figure the needle angle
+        float f = gps_units == LWGPS_SPEED_KPH?kph:mph;
         int angle = (270 + ((int)roundf(((f>MAX_SPEED?MAX_SPEED:f)/MAX_SPEED)*180.0f)));
         while(angle>=360) angle-=360;
         speed_needle.angle(angle);
