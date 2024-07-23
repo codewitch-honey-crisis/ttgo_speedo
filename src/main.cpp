@@ -237,6 +237,10 @@ static void update_all() {
         }
         // update the speed
         if(speed_changed) {
+            if((gps_units==LWGPS_SPEED_KPH && ((int)kph)>0) || (gps_units==LWGPS_SPEED_MPH && ((int)mph)>0)) {
+                display_wake();
+                dimmer.wake();
+            }
             itoa((int)roundf(sp>MAX_SPEED?MAX_SPEED:sp),speed_buffer,10);
             speed_label.text(speed_buffer);
             // figure the needle angle
