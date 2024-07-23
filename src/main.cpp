@@ -164,9 +164,6 @@ static void update_all() {
     
     // if we have GPS data:
     if(gps.is_valid) {
-        // for timing the trip counter
-        static uint32_t poll_ts = millis();
-        static uint64_t total_ts = 0;
         // old values so we know when changes occur
         // (avoid refreshing unless changed)
         static double old_trip = NAN;
@@ -175,22 +172,30 @@ static void update_all() {
         static float old_lat = NAN, old_lon = NAN, old_alt = NAN;
         static float old_mph = NAN, old_kph = NAN;
         static int old_angle = -1;
+
+        // for timing the trip counter
+        static uint32_t poll_ts = millis();
+        static uint64_t total_ts = 0;
         // compute how long since the last
         uint32_t diff_ts = millis()-poll_ts;
         poll_ts = millis();
         // add it to the total
         total_ts += diff_ts;
-        float mph = lwgps_to_speed(gps.speed,LWGPS_SPEED_MPH);
+        
         float kph = lwgps_to_speed(gps.speed,LWGPS_SPEED_KPH);
+        float mph = lwgps_to_speed(gps.speed,LWGPS_SPEED_MPH);
+
         if(total_ts>=100) {
             while(total_ts>=100) {
                 total_ts-=100;
                 trip_counter_miles+=mph;
                 trip_counter_kilos+=kph;
             }
-            // printf("Speed: %d %s\n",(int)speed_old_mph,speed_units);
-            double trip = (double)((gps_units==LWGPS_SPEED_KPH)? trip_counter_kilos:trip_counter_miles)/(60.0*60.0*10.0);
-            // printf("Trip: % .2f %s\n",trip,trip_units);
+            double trip = 
+                (double)((gps_units==LWGPS_SPEED_KPH)? 
+                trip_counter_kilos:
+                trip_counter_miles)
+                /(60.0*60.0*10.0);
             if(round(old_trip*100.0)!=round(trip*100.0)) {
                 snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",trip);
                 trip_label.text(trip_buffer);
@@ -198,7 +203,6 @@ static void update_all() {
             }
         }
         bool speed_changed = false;
-        // fill speed_buffer
         int sp;
         int old_sp;
         if(gps_units==LWGPS_SPEED_KPH) {
@@ -240,7 +244,10 @@ static void update_all() {
         }
         // update the speed
         if(speed_changed) {
-            if((gps_units==LWGPS_SPEED_KPH && ((int)roundf(kph))>0) || (gps_units==LWGPS_SPEED_MPH && ((int)roundf(mph))>0)) {
+            if((gps_units==LWGPS_SPEED_KPH && 
+                ((int)roundf(kph))>0) || 
+                    (gps_units==LWGPS_SPEED_MPH && 
+                        ((int)roundf(mph))>0)) {
                 display_wake();
                 dimmer.wake();
             }
@@ -248,7 +255,8 @@ static void update_all() {
             speed_label.text(speed_buffer);
             // figure the needle angle
             float f = gps_units == LWGPS_SPEED_KPH?kph:mph;
-            int angle = (270 + ((int)roundf(((f>MAX_SPEED?MAX_SPEED:f)/MAX_SPEED)*180.0f)));
+            int angle = (270 + 
+                ((int)roundf(((f>MAX_SPEED?MAX_SPEED:f)/MAX_SPEED)*180.0f)));
             while(angle>=360) angle-=360;
             if(old_angle!=angle) {
                 speed_needle.angle(angle);
@@ -272,8 +280,12 @@ static void update_all() {
             old_alt = gps.altitude;
         }
         // update the stat data
-        if(gps.sats_in_use!=old_sats_in_use||gps.sats_in_view!=old_sats_in_view) {
-            snprintf(stat_sat_buffer,sizeof(stat_sat_buffer),"%d/%d sats",(int)gps.sats_in_use,(int)gps.sats_in_view);
+        if(gps.sats_in_use!=old_sats_in_use||
+                gps.sats_in_view!=old_sats_in_view) {
+            snprintf(stat_sat_buffer,
+                sizeof(stat_sat_buffer),"%d/%d sats",
+                (int)gps.sats_in_use,
+                (int)gps.sats_in_view);
             stat_sat_label.text(stat_sat_buffer);
             old_sats_in_use = gps.sats_in_use;
             old_sats_in_view = gps.sats_in_view;
@@ -349,7 +361,13 @@ extern "C" void app_main() {
     ESP_ERROR_CHECK(uart_set_pin(UART_NUM_1, 21, 22, -1, -1));
     const int uart_buffer_size = (1024 * 2);
     QueueHandle_t uart_queue;
-    ESP_ERROR_CHECK(uart_driver_install(UART_NUM_1, uart_buffer_size, uart_buffer_size, 10, &uart_queue, 0));
+    ESP_ERROR_CHECK(uart_driver_install(
+        UART_NUM_1, 
+        uart_buffer_size, 
+        uart_buffer_size, 
+        10, 
+        &uart_queue, 
+        0));
     initialize_common();
     TaskHandle_t htask = nullptr;
     xTaskCreate(loop_task,"loop_task",4096,nullptr,uxTaskPriorityGet(nullptr),&htask);
