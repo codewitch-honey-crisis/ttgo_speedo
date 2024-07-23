@@ -132,7 +132,7 @@ void ui_init() {
     stat_screen.buffer1(lcd_buffer1);
     stat_screen.buffer2(lcd_buffer2);
     stat_sat_label.text_open_font(&text_font);
-    stat_sat_label.text_justify(uix_justify::top_middle);
+    stat_sat_label.text_justify(uix_justify::center);
     stat_sat_label.text_line_height(text_height/2);
     stat_sat_label.padding({10,0});
     stat_sat_label.background_color(transparent);

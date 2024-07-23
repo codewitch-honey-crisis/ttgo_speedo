@@ -49,7 +49,8 @@ static lwgps_t gps;
 static char speed_units[32];
 static char trip_units[16];
 static lwgps_speed_t gps_units;
-static uint64_t trip_counter = 0;
+static uint64_t trip_counter_miles = 0;
+static uint64_t trip_counter_kilos = 0;
 static char trip_buffer[64];
 static char rx_buffer[1024];
 static char speed_buffer[3];
@@ -78,7 +79,6 @@ static size_t serial_read(char* buffer, size_t size) {
 }
 // switch between imperial and metric units
 void toggle_units() {
-    trip_counter = 0;
     if(gps_units==LWGPS_SPEED_KPH) {
         gps_units = LWGPS_SPEED_MPH;
         strcpy(speed_units,"mph");
@@ -144,7 +144,9 @@ void button_b_on_long_click(void* state) {
     dimmer.wake();
 
     if(current_screen==1) {
-        trip_counter = 0;
+        trip_counter_miles = 0;
+        trip_counter_kilos = 0;
+    
         snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",0.0f);
         trip_label.text(trip_buffer);
     }
@@ -152,7 +154,8 @@ void button_b_on_long_click(void* state) {
 // main application loop
 static void update_all() {
     static uint8_t sats_old = 0;
-    static int speed_old = 0;
+    static int speed_old_kph = 0;
+    static int speed_old_mph = 0;
     if(gps.sats_in_use!=sats_old) {
         // printf("Satellites: %d/%d\n",(int)gps.sats_in_use,(int)gps.sats_in_view);
         sats_old = gps.sats_in_use;
@@ -161,9 +164,10 @@ static void update_all() {
     static uint32_t counter_ts = millis();
     if(millis()>=counter_ts+1000) {
         counter_ts = millis();
-        trip_counter+=speed_old;
-        // printf("Speed: %d %s\n",(int)speed_old,speed_units);
-        double trip = (double)trip_counter/(60.0*60.0);
+        trip_counter_miles+=speed_old_mph;
+        trip_counter_kilos+=speed_old_kph;
+        // printf("Speed: %d %s\n",(int)speed_old_mph,speed_units);
+        double trip = (double)((gps_units==LWGPS_SPEED_KPH)? trip_counter_kilos:trip_counter_miles)/(60.0*60.0);
         // printf("Trip: % .2f %s\n",trip,trip_units);
         snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",trip);
         trip_label.text(trip_buffer);
@@ -177,22 +181,31 @@ static void update_all() {
     }
     // if we have GPS data:
     if(gps.is_valid) {
-        float f = lwgps_to_speed(gps.speed,gps_units);
-        if(f>MAX_SPEED) f=MAX_SPEED;
-        int r = (int)roundf(f);
+        float f = lwgps_to_speed(gps.speed,LWGPS_SPEED_MPH);
+        int mph = (int)roundf(f);
+        if(mph>MAX_SPEED) mph=MAX_SPEED;
+        f = lwgps_to_speed(gps.speed,LWGPS_SPEED_KPH);
+        int kph = (int)roundf(f);
+        if(kph>MAX_SPEED) kph=MAX_SPEED;
+        
         // if the speed isn't zero wake the screen up
-        if((int)floorf(f)>0) {
+        if(kph>0 || mph>0) {
             display_wake();
             dimmer.wake();
         }
         // fill speed_buffer
-        itoa(r,speed_buffer,10);
+        if(gps_units==LWGPS_SPEED_KPH) {
+            itoa(kph,speed_buffer,10);
+        } else {
+            itoa(mph,speed_buffer,10);
+        }
         speed_label.text(speed_buffer);
+        speed_old_mph = mph;
+        speed_old_kph = kph;
         // figure the needle angle
         int angle = (270 + ((int)roundf((f/MAX_SPEED)*180.0f)));
         while(angle>=360) angle-=360;
         speed_needle.angle(angle);
-        speed_old = r;
         // update the position data
         snprintf(loc_lat_buffer,sizeof(loc_lat_buffer),"lat: % .2f",gps.latitude);
         loc_lat_label.text(loc_lat_buffer);
