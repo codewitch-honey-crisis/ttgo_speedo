@@ -94,6 +94,7 @@ void toggle_units() {
     speed_label.invalidate();
     speed_big_label.invalidate();
     speed_units_label.text(speed_units);
+    speed_big_units_label.text(speed_units);
     trip_label.invalidate();
     trip_units_label.text(trip_units);
 }
@@ -141,6 +142,7 @@ void button_b_on_click(int clicks, void* state) {
     if(clicks) {
         toggle_units();
         speed_units_label.text(speed_units);
+        speed_big_units_label.text(speed_units);
         trip_units_label.text(trip_units);
     }
 }
@@ -152,12 +154,16 @@ void button_b_on_long_click(void* state) {
         case 0:
             if(speed_label.visible()) {
                 speed_label.visible(false);
+                speed_units_label.visible(false);
                 speed_needle.visible(false);
                 speed_big_label.visible(true);
+                speed_big_units_label.visible(true);
             } else {
                 speed_label.visible(true);
+                speed_units_label.visible(true);
                 speed_needle.visible(true);
                 speed_big_label.visible(false);
+                speed_big_units_label.visible(false);
             }
         break;
         case 1:
@@ -344,6 +350,7 @@ static void initialize_common() {
     strcpy(speed_units,"kph");
     strcpy(trip_units,"kilometers");
     speed_units_label.text(speed_units);
+    speed_big_units_label.text(speed_units);
     trip_units_label.text(trip_units);
 #ifdef MILES
     toggle_units();

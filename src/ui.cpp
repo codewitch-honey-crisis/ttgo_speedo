@@ -17,6 +17,7 @@ needle_t speed_needle(speed_screen);
 label_t speed_label(speed_screen);
 label_t speed_units_label(speed_screen);
 label_t speed_big_label(speed_screen);
+label_t speed_big_units_label(speed_screen);
 
 screen_t trip_screen;
 label_t trip_label(trip_screen);
@@ -60,6 +61,7 @@ void ui_init() {
     speed_label.text("--");
     speed_screen.register_control(speed_label);
     const size_t unit_height = text_height/4;
+    const size_t unit_width = text_font.measure_text(ssize16::max(),spoint16::zero(),"MMM",text_font.scale(unit_height)).width;
     speed_units_label.bounds(srect16(speed_label.bounds().x1,speed_label.bounds().y1+text_height,speed_label.bounds().x2,speed_label.bounds().y1+text_height+unit_height));
     speed_units_label.text_open_font(&text_font);
     speed_units_label.text_line_height(unit_height);
@@ -69,9 +71,9 @@ void ui_init() {
     speed_units_label.text_color(color32_t::white);
     speed_units_label.text("---");
     speed_screen.register_control(speed_units_label);
-    speed_big_label.bounds(speed_screen.bounds());
+    speed_big_label.bounds(srect16(0,0,speed_screen.dimensions().width-unit_width-3,speed_screen.bounds().y2));
     speed_big_label.text_open_font(&text_font);
-    speed_big_label.text_line_height(speed_screen.dimensions().height*.90);
+    speed_big_label.text_line_height(speed_screen.dimensions().height);
     speed_big_label.border_color(transparent);
     speed_big_label.background_color(transparent);
     speed_big_label.text_color(color32_t::white);
@@ -79,6 +81,17 @@ void ui_init() {
     speed_big_label.visible(false);
     speed_big_label.text_justify(uix_justify::top_right);
     speed_screen.register_control(speed_big_label);
+    speed_big_units_label.bounds(srect16(speed_screen.dimensions().width-unit_width-1,0,speed_screen.bounds().x2,unit_height-1).center_vertical(speed_screen.bounds()));
+    speed_big_units_label.text_open_font(&text_font);
+    speed_big_units_label.text_line_height(unit_height);
+    speed_big_units_label.text_justify(uix_justify::center_right);
+    speed_big_units_label.border_color(transparent);
+    speed_big_units_label.background_color(transparent);
+    speed_big_units_label.text_color(color32_t::white);
+    speed_big_units_label.text("---");
+    speed_big_units_label.visible(false);
+    speed_screen.register_control(speed_big_units_label);
+    
 
     trip_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
     trip_screen.buffer_size(lcd_buffer_size);
