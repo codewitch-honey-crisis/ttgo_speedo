@@ -189,7 +189,7 @@ static void update_all() {
         if(kph>MAX_SPEED) kph=MAX_SPEED;
         
         // if the speed isn't zero wake the screen up
-        if(kph>0 || mph>0) {
+        if((gps_units==LWGPS_SPEED_KPH && kph>0) || (gps_units==LWGPS_SPEED_MPH && mph>0)) {
             display_wake();
             dimmer.wake();
         }
