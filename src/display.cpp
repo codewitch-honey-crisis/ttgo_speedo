@@ -1,7 +1,5 @@
-
 #define LCD_IMPLEMENTATION
 #include <lcd_init.h>
-
 #include <display.hpp>
 
 
@@ -17,6 +15,8 @@ uint8_t* lcd_buffer1=nullptr;
 
 // the active screen
 screen_t* display_active_screen = nullptr;
+
+// whether the display is sleeping
 static bool display_sleeping = false;
 
 #ifdef LCD_DMA
@@ -33,7 +33,6 @@ static bool lcd_flush_ready(esp_lcd_panel_io_handle_t panel_io,
 static void uix_flush(const gfx::rect16& bounds, 
                     const void* bmp, 
                     void* state) {
-                        //ESP_LOGI("display","FLUSH");
     lcd_panel_draw_bitmap(bounds.x1,bounds.y1,bounds.x2,bounds.y2,(void*)bmp);
     // no DMA, so we are done once the above completes
 #ifndef LCD_DMA
