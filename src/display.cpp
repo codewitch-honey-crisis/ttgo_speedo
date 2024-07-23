@@ -33,6 +33,7 @@ static bool lcd_flush_ready(esp_lcd_panel_io_handle_t panel_io,
 static void uix_flush(const gfx::rect16& bounds, 
                     const void* bmp, 
                     void* state) {
+    puts("flushing");
     lcd_panel_draw_bitmap(bounds.x1,bounds.y1,bounds.x2,bounds.y2,(void*)bmp);
     // no DMA, so we are done once the above completes
 #ifndef LCD_DMA
@@ -54,11 +55,7 @@ void display_init() {
         while(1);
     }
 #endif
-#ifndef LCD_PIN_NUM_VSYNC
     lcd_panel_init(lcd_buffer_size,lcd_flush_ready);
-#else
-    lcd_panel_init();
-#endif
 }
 
 void display_update() {
@@ -68,18 +65,8 @@ void display_update() {
 }
 
 void display_screen(screen_t& new_screen) {
-    if(display_active_screen!=nullptr) {
-        if(display_active_screen->flushing()) {
-            display_active_screen->update();
-        }
-    }
     display_active_screen = &new_screen;
     display_active_screen->on_flush_callback(uix_flush);
-#ifndef ESP_PLATFORM
-#ifdef LCD_DMA
-    active_screen->wait_flush_callback(uix_wait);
-#endif
-#endif
     display_active_screen->invalidate();   
 }
 void display_sleep() {
