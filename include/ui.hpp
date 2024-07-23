@@ -16,6 +16,7 @@ extern screen_t speed_screen;
 extern needle_t speed_needle;
 extern label_t speed_label;
 extern label_t speed_units_label;
+extern label_t speed_big_label;
 
 extern screen_t trip_screen;
 extern label_t trip_label;

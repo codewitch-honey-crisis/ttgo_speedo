@@ -91,7 +91,10 @@ void toggle_units() {
         strcpy(speed_units,"kph");
         strcpy(trip_units,"kilometers");
     }
+    speed_label.invalidate();
+    speed_big_label.invalidate();
     speed_units_label.text(speed_units);
+    trip_label.invalidate();
     trip_units_label.text(trip_units);
 }
 // top button handler - switch screens
@@ -145,13 +148,28 @@ void button_b_on_click(int clicks, void* state) {
 void button_b_on_long_click(void* state) {
     display_wake();
     dimmer.wake();
-
+    switch(current_screen) {
+        case 0:
+            if(speed_label.visible()) {
+                speed_label.visible(false);
+                speed_needle.visible(false);
+                speed_big_label.visible(true);
+            } else {
+                speed_label.visible(true);
+                speed_needle.visible(true);
+                speed_big_label.visible(false);
+            }
+        break;
+        case 1:
+            trip_counter_miles = 0;
+            trip_counter_kilos = 0;
+        
+            snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",0.0f);
+            trip_label.text(trip_buffer);
+        break;
+    }
     if(current_screen==1) {
-        trip_counter_miles = 0;
-        trip_counter_kilos = 0;
-    
-        snprintf(trip_buffer,sizeof(trip_buffer),"% .2f",0.0f);
-        trip_label.text(trip_buffer);
+        
     }
 }
 // main application loop
@@ -253,6 +271,7 @@ static void update_all() {
             }
             itoa((int)roundf(sp>MAX_SPEED?MAX_SPEED:sp),speed_buffer,10);
             speed_label.text(speed_buffer);
+            speed_big_label.text(speed_buffer);
             // figure the needle angle
             float f = gps_units == LWGPS_SPEED_KPH?kph:mph;
             int angle = (270 + 
@@ -320,6 +339,7 @@ static void initialize_common() {
     lwgps_init(&gps);
     strcpy(speed_buffer,"--");
     speed_label.text(speed_buffer);
+    speed_big_label.text(speed_buffer);
     gps_units = LWGPS_SPEED_KPH;
     strcpy(speed_units,"kph");
     strcpy(trip_units,"kilometers");

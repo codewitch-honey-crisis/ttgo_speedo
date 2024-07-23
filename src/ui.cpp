@@ -16,6 +16,7 @@ screen_t speed_screen;
 needle_t speed_needle(speed_screen);
 label_t speed_label(speed_screen);
 label_t speed_units_label(speed_screen);
+label_t speed_big_label(speed_screen);
 
 screen_t trip_screen;
 label_t trip_label(trip_screen);
@@ -68,7 +69,17 @@ void ui_init() {
     speed_units_label.text_color(color32_t::white);
     speed_units_label.text("---");
     speed_screen.register_control(speed_units_label);
-    
+    speed_big_label.bounds(speed_screen.bounds());
+    speed_big_label.text_open_font(&text_font);
+    speed_big_label.text_line_height(speed_screen.dimensions().height*.90);
+    speed_big_label.border_color(transparent);
+    speed_big_label.background_color(transparent);
+    speed_big_label.text_color(color32_t::white);
+    speed_big_label.text("--");
+    speed_big_label.visible(false);
+    speed_big_label.text_justify(uix_justify::top_right);
+    speed_screen.register_control(speed_big_label);
+
     trip_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
     trip_screen.buffer_size(lcd_buffer_size);
     trip_screen.buffer1(lcd_buffer1);
