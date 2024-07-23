@@ -216,28 +216,32 @@ static void update_all() {
         old_mph = mph;
         old_kph = kph;
         if(!speed_changed && dimmer.faded()) {
-            // force a refresh next time the screen is woken
-            if(old_angle!=-1) {
-                old_trip = NAN;
-                old_sats_in_use = -1;
-                old_sats_in_view = -1;
-                old_lat = NAN; old_lon = NAN; old_alt = NAN;
-                old_angle = -1;
-            }
             // if the speed isn't zero or it's not the speed screen wake the screen up
-            if(current_screen!=0 || (gps_units==LWGPS_SPEED_KPH && ((int)kph)>0) || (gps_units==LWGPS_SPEED_MPH && ((int)mph)>0)) {
+            if(current_screen!=0 || (gps_units==LWGPS_SPEED_KPH && ((int)roundf(kph))>0) || (gps_units==LWGPS_SPEED_MPH && ((int)roundf(mph))>0)) {
+                puts("wake");
                 display_wake();
                 dimmer.wake();
+            } else {
+                // force a refresh next time the screen is woken
+                if(old_angle!=-1) {
+                    old_trip = NAN;
+                    old_sats_in_use = -1;
+                    old_sats_in_view = -1;
+                    old_lat = NAN; old_lon = NAN; old_alt = NAN;
+                    old_angle = -1;
+                }
+                
+                // make sure we pump before returning
+                button_a.update();
+                button_b.update();
+                dimmer.update();
+                return;
             }
-            // make sure we pump before returning
-            button_a.update();
-            button_b.update();
-            dimmer.update();
-            return;
         }
         // update the speed
         if(speed_changed) {
-            if((gps_units==LWGPS_SPEED_KPH && ((int)kph)>0) || (gps_units==LWGPS_SPEED_MPH && ((int)mph)>0)) {
+            puts("Speed change");
+            if((gps_units==LWGPS_SPEED_KPH && ((int)roundf(kph))>0) || (gps_units==LWGPS_SPEED_MPH && ((int)roundf(mph))>0)) {
                 display_wake();
                 dimmer.wake();
             }
