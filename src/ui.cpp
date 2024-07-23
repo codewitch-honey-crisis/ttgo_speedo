@@ -39,7 +39,7 @@ void ui_init() {
     rgba_pixel<32> transparent(0, 0, 0, 0);
     // screen is black
     speed_screen.background_color(color_t::black);
-    speed_needle.bounds(srect16(0,0,127,127).center_vertical(speed_screen.bounds()));
+    speed_needle.bounds(srect16(0,0,127,127).center_vertical(speed_screen.bounds()).offset(0,speed_screen.dimensions().height/5));
     speed_needle.needle_border_color(color32_t::red);
     rgba_pixel<32> nc;
     nc.channelr<channel_name::R,channel_name::G,channel_name::B>(.5f,0,0);
