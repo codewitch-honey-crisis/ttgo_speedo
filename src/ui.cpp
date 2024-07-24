@@ -40,8 +40,7 @@ void ui_init() {
     speed_needle.bounds(srect16(0,0,127,127).center_vertical(
         speed_screen.bounds()).offset(0,speed_screen.dimensions().height/5));
     speed_needle.needle_border_color(color32_t::red);
-    rgba_pixel<32> nc;
-    nc.channelr<channel_name::R,channel_name::G,channel_name::B>(.5f,0,0);
+    rgba_pixel<32> nc(true,.5f,0,0);
     speed_needle.needle_color(nc);
     speed_needle.angle(270);
     speed_screen.register_control(speed_needle);
@@ -65,19 +64,19 @@ void ui_init() {
     speed_label.bounds(speed_rect);
     speed_label.text("--");
     speed_screen.register_control(speed_label);
-    const size_t unit_height = text_height/4;
-    const size_t unit_width = text_font.measure_text(
+    const size_t speed_unit_height = text_height/4;
+    const size_t speed_unit_width = text_font.measure_text(
         ssize16::max(),
         spoint16::zero(),
         "MMM",
-        text_font.scale(unit_height)).width;
+        text_font.scale(speed_unit_height)).width;
     speed_units_label.bounds(
         srect16(speed_label.bounds().x1,
             speed_label.bounds().y1+text_height,
             speed_label.bounds().x2,
-            speed_label.bounds().y1+text_height+unit_height));
+            speed_label.bounds().y1+text_height+speed_unit_height));
     speed_units_label.text_open_font(&text_font);
-    speed_units_label.text_line_height(unit_height);
+    speed_units_label.text_line_height(speed_unit_height);
     speed_units_label.text_justify(uix_justify::top_right);
     speed_units_label.border_color(transparent);
     speed_units_label.background_color(transparent);
@@ -87,7 +86,7 @@ void ui_init() {
     speed_big_label.bounds(
         srect16(0,
             0,
-            speed_screen.dimensions().width-unit_width-3,
+            speed_screen.dimensions().width-speed_unit_width-3,
             speed_screen.bounds().y2));
     speed_big_label.text_open_font(&text_font);
     speed_big_label.text_line_height(speed_screen.dimensions().height*1.2);
@@ -99,13 +98,13 @@ void ui_init() {
     speed_big_label.text_justify(uix_justify::center_right);
     speed_screen.register_control(speed_big_label);
     speed_big_units_label.bounds(
-        srect16(speed_screen.dimensions().width-unit_width-1,
+        srect16(speed_screen.dimensions().width-speed_unit_width-1,
             0,
             speed_screen.bounds().x2,
-            unit_height-1)
+            speed_unit_height-1)
                 .center_vertical(speed_screen.bounds()));
     speed_big_units_label.text_open_font(&text_font);
-    speed_big_units_label.text_line_height(unit_height);
+    speed_big_units_label.text_line_height(speed_unit_height);
     speed_big_units_label.text_justify(uix_justify::center_right);
     speed_big_units_label.border_color(transparent);
     speed_big_units_label.background_color(transparent);
@@ -132,9 +131,9 @@ void ui_init() {
         srect16(trip_label.bounds().x1,
             trip_label.bounds().y1+text_height+1,
             trip_label.bounds().x2,
-            trip_label.bounds().y1+text_height+unit_height+1));
+            trip_label.bounds().y1+text_height+speed_unit_height+1));
     trip_units_label.text_open_font(&text_font);
-    trip_units_label.text_line_height(unit_height);
+    trip_units_label.text_line_height(speed_unit_height);
     trip_units_label.text_justify(uix_justify::top_right);
     trip_units_label.border_color(transparent);
     trip_units_label.background_color(transparent);
