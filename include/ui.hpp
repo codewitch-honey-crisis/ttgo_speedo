@@ -4,6 +4,7 @@
 #include <gfx.hpp>
 #include "svg_needle.hpp"
 
+// for our controls
 using surface_t = screen_t::control_surface_type;
 using label_t = uix::label<surface_t>;
 using needle_t = svg_needle<surface_t>;
