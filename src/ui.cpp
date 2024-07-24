@@ -29,15 +29,16 @@ label_t stat_sat_label(stat_screen);
 
 // initialize the main screen
 void ui_init() {
+    // declare a transparent pixel/color
+    rgba_pixel<32> transparent(0, 0, 0, 0);
+    
     speed_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
     speed_screen.buffer_size(lcd_buffer_size);
     speed_screen.buffer1(lcd_buffer1);
     speed_screen.buffer2(lcd_buffer2);
-    // declare a transparent pixel/color
-    rgba_pixel<32> transparent(0, 0, 0, 0);
-    // screen is black
     speed_screen.background_color(color_t::black);
-    speed_needle.bounds(srect16(0,0,127,127).center_vertical(speed_screen.bounds()).offset(0,speed_screen.dimensions().height/5));
+    speed_needle.bounds(srect16(0,0,127,127).center_vertical(
+        speed_screen.bounds()).offset(0,speed_screen.dimensions().height/5));
     speed_needle.needle_border_color(color32_t::red);
     rgba_pixel<32> nc;
     nc.channelr<channel_name::R,channel_name::G,channel_name::B>(.5f,0,0);
@@ -47,7 +48,15 @@ void ui_init() {
     speed_label.text_open_font(&text_font);
     const size_t text_height = (int)floorf(speed_screen.dimensions().height/1.5f);
     speed_label.text_line_height(text_height);
-    srect16 speed_rect = text_font.measure_text(ssize16::max(),spoint16::zero(),"888",text_font.scale(text_height),0,speed_label.text_encoding()).bounds().center_vertical(speed_screen.bounds());
+    srect16 speed_rect = text_font.
+        measure_text(ssize16::max(),
+            spoint16::zero(),
+            "888",
+            text_font.scale(text_height),
+            0,
+            speed_label.text_encoding())
+                .bounds()
+                .center_vertical(speed_screen.bounds());
     speed_rect.offset_inplace(speed_screen.dimensions().width-speed_rect.width(),0);
     speed_label.text_justify(uix_justify::top_right);
     speed_label.border_color(transparent);
@@ -57,8 +66,16 @@ void ui_init() {
     speed_label.text("--");
     speed_screen.register_control(speed_label);
     const size_t unit_height = text_height/4;
-    const size_t unit_width = text_font.measure_text(ssize16::max(),spoint16::zero(),"MMM",text_font.scale(unit_height)).width;
-    speed_units_label.bounds(srect16(speed_label.bounds().x1,speed_label.bounds().y1+text_height,speed_label.bounds().x2,speed_label.bounds().y1+text_height+unit_height));
+    const size_t unit_width = text_font.measure_text(
+        ssize16::max(),
+        spoint16::zero(),
+        "MMM",
+        text_font.scale(unit_height)).width;
+    speed_units_label.bounds(
+        srect16(speed_label.bounds().x1,
+            speed_label.bounds().y1+text_height,
+            speed_label.bounds().x2,
+            speed_label.bounds().y1+text_height+unit_height));
     speed_units_label.text_open_font(&text_font);
     speed_units_label.text_line_height(unit_height);
     speed_units_label.text_justify(uix_justify::top_right);
@@ -67,7 +84,11 @@ void ui_init() {
     speed_units_label.text_color(color32_t::white);
     speed_units_label.text("---");
     speed_screen.register_control(speed_units_label);
-    speed_big_label.bounds(srect16(0,0,speed_screen.dimensions().width-unit_width-3,speed_screen.bounds().y2));
+    speed_big_label.bounds(
+        srect16(0,
+            0,
+            speed_screen.dimensions().width-unit_width-3,
+            speed_screen.bounds().y2));
     speed_big_label.text_open_font(&text_font);
     speed_big_label.text_line_height(speed_screen.dimensions().height*1.2);
     speed_big_label.border_color(transparent);
@@ -77,7 +98,12 @@ void ui_init() {
     speed_big_label.visible(false);
     speed_big_label.text_justify(uix_justify::center_right);
     speed_screen.register_control(speed_big_label);
-    speed_big_units_label.bounds(srect16(speed_screen.dimensions().width-unit_width-1,0,speed_screen.bounds().x2,unit_height-1).center_vertical(speed_screen.bounds()));
+    speed_big_units_label.bounds(
+        srect16(speed_screen.dimensions().width-unit_width-1,
+            0,
+            speed_screen.bounds().x2,
+            unit_height-1)
+                .center_vertical(speed_screen.bounds()));
     speed_big_units_label.text_open_font(&text_font);
     speed_big_units_label.text_line_height(unit_height);
     speed_big_units_label.text_justify(uix_justify::center_right);
@@ -102,7 +128,11 @@ void ui_init() {
     trip_label.bounds(srect16(0,0,trip_screen.bounds().x2,text_height+1));
     trip_label.text("----");
     trip_screen.register_control(trip_label);
-    trip_units_label.bounds(srect16(trip_label.bounds().x1,trip_label.bounds().y1+text_height+1,trip_label.bounds().x2,trip_label.bounds().y1+text_height+unit_height+1));
+    trip_units_label.bounds(
+        srect16(trip_label.bounds().x1,
+            trip_label.bounds().y1+text_height+1,
+            trip_label.bounds().x2,
+            trip_label.bounds().y1+text_height+unit_height+1));
     trip_units_label.text_open_font(&text_font);
     trip_units_label.text_line_height(unit_height);
     trip_units_label.text_justify(uix_justify::top_right);
@@ -112,12 +142,14 @@ void ui_init() {
     trip_units_label.text("-------");
     trip_screen.register_control(trip_units_label);
     
-    const size_t loc_height = trip_screen.dimensions().height/4;
     loc_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
+    const size_t loc_height = trip_screen.dimensions().height/4;
     loc_screen.buffer_size(lcd_buffer_size);
     loc_screen.buffer1(lcd_buffer1);
     loc_screen.buffer2(lcd_buffer2);
-    loc_lat_label.bounds(srect16(spoint16(10,loc_height/2),ssize16(trip_screen.dimensions().width-20,loc_height)));
+    loc_lat_label.bounds(
+        srect16(spoint16(10,loc_height/2),
+            ssize16(trip_screen.dimensions().width-20,loc_height)));
     loc_lat_label.text_open_font(&text_font);
     loc_lat_label.text_line_height(loc_height);
     loc_lat_label.padding({0,0});
@@ -156,7 +188,8 @@ void ui_init() {
     stat_sat_label.background_color(transparent);
     stat_sat_label.border_color(transparent);
     stat_sat_label.text_color(color32_t::light_blue);
-    stat_sat_label.bounds(srect16(0,0,stat_screen.bounds().x2,text_height+1));
+    stat_sat_label.bounds(
+        srect16(0,0,stat_screen.bounds().x2,text_height+1));
     stat_sat_label.text("-/- sats");
     stat_screen.register_control(stat_sat_label);
 }
