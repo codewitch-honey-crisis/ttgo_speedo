@@ -138,7 +138,7 @@ void ui_init() {
     trip_units_label.border_color(transparent);
     trip_units_label.background_color(transparent);
     trip_units_label.text_color(color32_t::white);
-    trip_units_label.text("-------");
+    trip_units_label.text("---");
     trip_screen.register_control(trip_units_label);
     
     loc_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
