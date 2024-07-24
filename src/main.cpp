@@ -174,9 +174,6 @@ void button_b_on_long_click(void* state) {
             trip_label.text(trip_buffer);
         break;
     }
-    if(current_screen==1) {
-        
-    }
 }
 // main application loop
 static void update_all() {

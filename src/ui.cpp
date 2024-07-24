@@ -88,7 +88,6 @@ void ui_init() {
     speed_big_units_label.visible(false);
     speed_screen.register_control(speed_big_units_label);
     
-
     trip_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
     trip_screen.buffer_size(lcd_buffer_size);
     trip_screen.buffer1(lcd_buffer1);
@@ -102,6 +101,7 @@ void ui_init() {
     trip_label.text_color(color32_t::orange);
     trip_label.bounds(srect16(0,0,trip_screen.bounds().x2,text_height+1));
     trip_label.text("----");
+    trip_screen.register_control(trip_label);
     trip_units_label.bounds(srect16(trip_label.bounds().x1,trip_label.bounds().y1+text_height+1,trip_label.bounds().x2,trip_label.bounds().y1+text_height+unit_height+1));
     trip_units_label.text_open_font(&text_font);
     trip_units_label.text_line_height(unit_height);
@@ -112,8 +112,6 @@ void ui_init() {
     trip_units_label.text("-------");
     trip_screen.register_control(trip_units_label);
     
-    trip_screen.register_control(trip_label);
-
     const size_t loc_height = trip_screen.dimensions().height/4;
     loc_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
     loc_screen.buffer_size(lcd_buffer_size);
