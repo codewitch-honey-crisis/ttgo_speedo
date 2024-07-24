@@ -142,10 +142,10 @@ void ui_init() {
     trip_screen.register_control(trip_units_label);
     
     loc_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
-    const size_t loc_height = trip_screen.dimensions().height/4;
     loc_screen.buffer_size(lcd_buffer_size);
     loc_screen.buffer1(lcd_buffer1);
     loc_screen.buffer2(lcd_buffer2);
+    const size_t loc_height = trip_screen.dimensions().height/4;
     loc_lat_label.bounds(
         srect16(spoint16(10,loc_height/2),
             ssize16(trip_screen.dimensions().width-20,loc_height)));
