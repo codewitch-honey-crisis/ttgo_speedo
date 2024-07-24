@@ -1,7 +1,7 @@
 // our font for the UI. 
 #define OPENSANS_REGULAR_IMPLEMENTATION
 #include "fonts/OpenSans_Regular.hpp"
-#include <ui.hpp>
+#include "ui.hpp"
 // for easier modification
 const gfx::open_font& text_font = OpenSans_Regular;
 

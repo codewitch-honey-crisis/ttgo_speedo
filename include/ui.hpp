@@ -13,7 +13,7 @@ using color_t = gfx::color<typename screen_t::pixel_type>;
 // RGBA8888 X11 colors (used for controls)
 using color32_t = gfx::color<gfx::rgba_pixel<32>>;
 
-// the screen that holds the controls
+// the screens and controls
 extern screen_t speed_screen;
 extern needle_t speed_needle;
 extern label_t speed_label;
