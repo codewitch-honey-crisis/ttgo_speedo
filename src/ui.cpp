@@ -29,9 +29,6 @@ label_t stat_sat_label;
 
 // initialize the main screen
 void ui_init() {
-    // declare a transparent pixel/color
-    //rgba_pixel<32> transparent(0, 0, 0, 0);
-    
     speed_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
     speed_screen.background_color(color_t::black);
     speed_needle.bounds(srect16(0,0,127,127).center_vertical(
