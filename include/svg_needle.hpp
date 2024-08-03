@@ -1,6 +1,6 @@
 #pragma once
 #include <uix_core.hpp>
-/// @brief Represents an analog clock
+/// @brief Represents an analog needle
 /// @tparam ControlSurfaceType The control surface type, usually taken from the screen
 template <typename ControlSurfaceType>
 class svg_needle : public uix::control<ControlSurfaceType> {
@@ -54,35 +54,46 @@ class svg_needle : public uix::control<ControlSurfaceType> {
     }
 
    public:
-    /// @brief Moves a new clock control from an existing one
-    /// @param rhs The existing clock
+    /// @brief Moves a new needle control from an existing one
+    /// @param rhs The existing needle
     svg_needle(svg_needle&& rhs) {
         do_move_control(rhs);
     }
-    /// @brief Moves the clock control from an existing one
-    /// @param rhs The existing clock
-    /// @return This clock
+    /// @brief Moves the needle control from an existing one
+    /// @param rhs The existing needle
+    /// @return This needle
     svg_needle& operator=(svg_needle&& rhs) {
         do_move_control(rhs);
         return *this;
     }
-    /// @brief Copies a new clock control from an existing one
-    /// @param rhs The existing clock
+    /// @brief Copies a new needle control from an existing one
+    /// @param rhs The existing needle
     svg_needle(const svg_needle& rhs) {
         do_copy_control(rhs);
     }
-    /// @brief Copies the clock control from an existing one
-    /// @param rhs The exisitng clock
-    /// @return This clock
+    /// @brief Copies the needle control from an existing one
+    /// @param rhs The exisitng needle
+    /// @return This needle
     svg_needle& operator=(const svg_needle& rhs) {
         do_copy_control(rhs);
         return *this;
     }
-    /// @brief Constructs a new instance of a clock
+    /// @brief Constructs a new instance of a needle
     /// @param parent The parent (a screen)
     /// @param palette The palette, if applicable
     svg_needle(uix::invalidation_tracker& parent, const palette_type* palette = nullptr)
         : base_type(parent, palette), m_angle(0), m_dirty(true) {
+        static const constexpr gfx::rgba_pixel<32> white(0xFF, 0xFF, 0xFF, 0xFF);
+        static const constexpr gfx::rgba_pixel<32> black(0x0, 0x0, 0x0, 0xFF);
+        static const constexpr gfx::rgba_pixel<32> gray(0x7F, 0x7F, 0x7F, 0xFF);
+        static const constexpr gfx::rgba_pixel<32> red(0xFF, 0x0, 0x0, 0xFF);
+        m_needle_color = red;
+        m_needle_border_color = red;
+        m_needle_border_width = 1;
+    }
+    /// @brief Constructs a new instance of a needle
+    svg_needle()
+        : base_type(), m_angle(0), m_dirty(true) {
         static const constexpr gfx::rgba_pixel<32> white(0xFF, 0xFF, 0xFF, 0xFF);
         static const constexpr gfx::rgba_pixel<32> black(0x0, 0x0, 0x0, 0xFF);
         static const constexpr gfx::rgba_pixel<32> gray(0x7F, 0x7F, 0x7F, 0xFF);

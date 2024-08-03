@@ -9,23 +9,23 @@ using namespace uix;
 using namespace gfx;
 
 screen_t speed_screen;
-needle_t speed_needle(speed_screen);
-label_t speed_label(speed_screen);
-label_t speed_units_label(speed_screen);
-label_t speed_big_label(speed_screen);
-label_t speed_big_units_label(speed_screen);
+needle_t speed_needle;
+label_t speed_label;
+label_t speed_units_label;
+label_t speed_big_label;
+label_t speed_big_units_label;
 
 screen_t trip_screen;
-label_t trip_label(trip_screen);
-label_t trip_units_label(trip_screen);
+label_t trip_label;
+label_t trip_units_label;
 
 screen_t loc_screen;
-label_t loc_lat_label(loc_screen);
-label_t loc_lon_label(loc_screen);
-label_t loc_alt_label(loc_screen);
+label_t loc_lat_label;
+label_t loc_lon_label;
+label_t loc_alt_label;
 
 screen_t stat_screen;
-label_t stat_sat_label(stat_screen);
+label_t stat_sat_label;
 
 // initialize the main screen
 void ui_init() {
