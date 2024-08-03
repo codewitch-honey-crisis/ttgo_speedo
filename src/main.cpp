@@ -14,6 +14,8 @@
 #include <driver/uart.h>
 extern "C" void app_main();
 #endif
+#define LCD_IMPLEMENTATION
+#include "lcd_init.h"
 #include <button.hpp>
 #include <lcd_miser.hpp>
 #include <uix.hpp>
@@ -46,6 +48,96 @@ static lcd_miser<4> dimmer;
 // gps decoder
 static lwgps_t gps;
 
+#define LCD_TRANSFER_KB 64
+
+// here we compute how many bytes are needed in theory to store the total screen.
+constexpr static const size_t lcd_screen_total_size = 
+    gfx::bitmap<typename LCD_FRAME_ADAPTER::pixel_type>
+        ::sizeof_buffer(LCD_WIDTH,LCD_HEIGHT);
+// define our transfer buffer(s) 
+// For devices with no DMA we only use one buffer.
+// Our total size is either LCD_TRANSFER_KB 
+// Or the lcd_screen_total_size - whatever
+// is smaller
+// Note that in the case of DMA the memory
+// is divided between two buffers.
+
+#ifdef LCD_DMA
+constexpr static const size_t lcd_buffer_size = (LCD_TRANSFER_KB*512) >
+    lcd_screen_total_size?lcd_screen_total_size:(LCD_TRANSFER_KB*512);
+uint8_t* lcd_buffer1;
+uint8_t* lcd_buffer2;
+#else
+#ifdef LCD_PSRAM_BUFFER
+constexpr static const size_t lcd_buffer_size = LCD_PSRAM_BUFFER;
+#else
+constexpr static const size_t lcd_buffer_size = (LCD_TRANSFER_KB*1024) > 
+    lcd_screen_total_size?lcd_screen_total_size:(LCD_TRANSFER_KB*1024);
+#endif
+uint8_t* lcd_buffer1;
+static uint8_t* const lcd_buffer2 = nullptr;
+#endif
+
+using display_t = uix::display;
+static display_t disp;
+#ifdef LCD_DMA
+// only needed if DMA enabled
+static bool display_flush_ready(esp_lcd_panel_io_handle_t panel_io, 
+                            esp_lcd_panel_io_event_data_t* edata, 
+                            void* user_ctx) {
+    disp.flush_complete();
+    return true;
+}
+#endif
+static void display_flush(const gfx::rect16& bounds, 
+                    const void* bmp, 
+                    void* state) {
+    lcd_panel_draw_bitmap(bounds.x1,bounds.y1,bounds.x2,bounds.y2,(void*)bmp);
+    // no DMA, so we are done once the above completes
+#ifndef LCD_DMA
+    disp.flush_complete();
+#endif
+}
+
+static void display_init() {
+    lcd_buffer1 = (uint8_t*)heap_caps_malloc(lcd_buffer_size,MALLOC_CAP_DMA);
+    if(lcd_buffer1==nullptr) {
+        puts("Error allocating LCD buffer 1");
+        while(1);
+    }
+#ifdef LCD_DMA
+    lcd_buffer2 = (uint8_t*)heap_caps_malloc(lcd_buffer_size,MALLOC_CAP_DMA);
+    if(lcd_buffer2==nullptr) {
+        puts("Error allocating LCD buffer 2");
+        while(1);
+    }
+#endif
+    lcd_panel_init(lcd_buffer_size,display_flush_ready);
+}
+
+static bool display_sleeping = false;
+void display_sleep() {
+    if(!display_sleeping) {
+        //esp_lcd_panel_io_tx_param(lcd_io_handle,0x10,NULL,0);
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+        esp_lcd_panel_disp_on_off(lcd_handle, false);
+#else
+        esp_lcd_panel_disp_off(lcd_handle, true);
+#endif
+        display_sleeping = true;
+    }
+}
+void display_wake() {
+    if(display_sleeping) {
+        //esp_lcd_panel_io_tx_param(lcd_io_handle,0x11,NULL,0);
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+        esp_lcd_panel_disp_on_off(lcd_handle, true);
+#else
+        esp_lcd_panel_disp_off(lcd_handle, false);
+#endif
+        display_sleeping = false;
+    }
+}
 // ui data
 static char speed_units[16];
 static char trip_units[16];
@@ -113,19 +205,19 @@ void button_a_on_pressed_changed(bool pressed, void* state) {
         switch(current_screen) {
             case 0:
                 // puts("Speed screen");
-                display_screen(speed_screen);
+                disp.active_screen(&speed_screen);
                 break;
             case 1:
                 // puts("Trip screen");
-                display_screen(trip_screen);
+                disp.active_screen(&trip_screen);
                 break;
             case 2:
                 // puts("Location screen");
-                display_screen(loc_screen);
+                disp.active_screen(&loc_screen);
                 break;
             case 3:
                 // puts("Stat screen");
-                display_screen(stat_screen);
+                disp.active_screen(&stat_screen);
                 break;
         }
     } 
@@ -319,7 +411,7 @@ static void update_all() {
         dimmer.wake();
     }
     // update the various objects
-    display_update();
+    disp.update();
     button_a.update();
     button_b.update();
     dimmer.update();
@@ -353,8 +445,11 @@ static void initialize_common() {
     toggle_units();
 #endif
     puts("Booted");
-
-    display_screen(speed_screen);
+    disp.buffer_size(lcd_buffer_size);
+    disp.buffer1(lcd_buffer1);
+    disp.buffer2(lcd_buffer2);
+    disp.on_flush_callback(display_flush);
+    disp.active_screen(&speed_screen);
 }
 #ifdef ARDUINO
 void setup() {

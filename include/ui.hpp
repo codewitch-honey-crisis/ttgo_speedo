@@ -1,8 +1,10 @@
 #pragma once
-#include "display.hpp"
+#include "lcd_config.h"
 #include <uix.hpp>
 #include <gfx.hpp>
 #include "svg_needle.hpp"
+// declare the screen type
+using screen_t = uix::screen_ex<LCD_FRAME_ADAPTER,LCD_X_ALIGN,LCD_Y_ALIGN>;
 
 // for our controls
 using surface_t = screen_t::control_surface_type;

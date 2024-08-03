@@ -33,9 +33,6 @@ void ui_init() {
     rgba_pixel<32> transparent(0, 0, 0, 0);
     
     speed_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
-    speed_screen.buffer_size(lcd_buffer_size);
-    speed_screen.buffer1(lcd_buffer1);
-    speed_screen.buffer2(lcd_buffer2);
     speed_screen.background_color(color_t::black);
     speed_needle.bounds(srect16(0,0,127,127).center_vertical(
         speed_screen.bounds()).offset(0,speed_screen.dimensions().height/5));
@@ -114,9 +111,6 @@ void ui_init() {
     speed_screen.register_control(speed_big_units_label);
     
     trip_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
-    trip_screen.buffer_size(lcd_buffer_size);
-    trip_screen.buffer1(lcd_buffer1);
-    trip_screen.buffer2(lcd_buffer2);
     trip_label.text_open_font(&text_font);
     trip_label.text_justify(uix_justify::top_right);
     trip_label.text_line_height(text_height);
@@ -142,9 +136,6 @@ void ui_init() {
     trip_screen.register_control(trip_units_label);
     
     loc_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
-    loc_screen.buffer_size(lcd_buffer_size);
-    loc_screen.buffer1(lcd_buffer1);
-    loc_screen.buffer2(lcd_buffer2);
     const size_t loc_height = trip_screen.dimensions().height/4;
     loc_lat_label.bounds(
         srect16(spoint16(10,loc_height/2),
@@ -177,9 +168,6 @@ void ui_init() {
     loc_screen.register_control(loc_alt_label);
 
     stat_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
-    stat_screen.buffer_size(lcd_buffer_size);
-    stat_screen.buffer1(lcd_buffer1);
-    stat_screen.buffer2(lcd_buffer2);
     stat_sat_label.text_open_font(&text_font);
     stat_sat_label.text_justify(uix_justify::center);
     stat_sat_label.text_line_height(text_height/2);
