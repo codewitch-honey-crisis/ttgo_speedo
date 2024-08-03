@@ -27,7 +27,7 @@ label_t loc_alt_label;
 screen_t stat_screen;
 label_t stat_sat_label;
 
-// initialize the main screen
+// initialize the screens
 void ui_init() {
     speed_screen.dimensions({LCD_WIDTH,LCD_HEIGHT});
     speed_screen.background_color(color_t::black);
